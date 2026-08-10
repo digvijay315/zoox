@@ -43,7 +43,7 @@ export default function Login({ onLoginSuccess }) {
             <Layers className="w-10 h-10 text-white" />
           </div>
           <h2 className="text-3xl font-black font-serif tracking-tight text-white mt-2">
-            Secure Billing Pro OS
+            Zoox
           </h2>
           <p className="text-xs text-amber-500 uppercase tracking-widest font-bold mt-1">
             Central Dashboard
