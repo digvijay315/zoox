@@ -1,8 +1,8 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:5000/",
-  // baseURL:"https://saas-billing-app.onrender.com/"
+  // baseURL: "http://localhost:5000/",
+  baseURL:"https://zoox.onrender.com/"
 });
 
 let activeRequests = 0;
