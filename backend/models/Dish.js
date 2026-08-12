@@ -23,6 +23,24 @@ const dishSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    recipe: [
+      {
+        item: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "InventoryItem",
+          required: true,
+        },
+        quantity: {
+          type: Number,
+          required: true,
+          min: 0,
+        },
+        unit: {
+          type: String,
+          default: "kg",
+        },
+      }
+    ],
 
   },
   {

@@ -135,6 +135,7 @@ export default function AdminKotReports() {
                 <tr className="border-b border-slate-800 bg-slate-900/10 text-slate-400 font-semibold uppercase tracking-wider">
                   <th className="py-4 px-6">Order Date</th>
                   <th className="py-4 px-6">Type & ID</th>
+                  <th className="py-4 px-6">Customer Details</th>
                   <th className="py-4 px-6">Items</th>
                   <th className="py-4 px-6">Created By</th>
                   <th className="py-4 px-6">Payment Mode</th>
@@ -164,6 +165,18 @@ export default function AdminKotReports() {
                           {order.orderType === 'Table' ? `Table ${order.table?.tableNo || 'N/A'}` : order.orderDisplayId}
                         </div>
                         <div className="text-[10px] text-amber-500 font-mono mt-0.5">{order.orderType}</div>
+                      </td>
+                      <td className="py-4 px-6 text-slate-300">
+                        {order.customerName ? (
+                          <>
+                            <div className="font-semibold text-slate-200">{order.customerName}</div>
+                            {order.customerMobile && <div className="text-[10px] text-slate-400">{order.customerMobile}</div>}
+                          </>
+                        ) : (
+                          <span className="text-slate-500 italic text-xs">
+                            {order.orderType === 'Table' ? `Table ${order.table?.tableNo || 'N/A'}` : order.orderDisplayId} (Unbilled)
+                          </span>
+                        )}
                       </td>
                       <td className="py-4 px-6 text-slate-300">
                         {order.items.length} items

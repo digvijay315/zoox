@@ -99,14 +99,18 @@ export default function PremiumInvoice({ invoice, onClose }) {
           <div className="w-[60%] text-right pr-4">Total:</div>
           <div className="w-[40%] text-right">{subTotal.toFixed(2)}</div>
         </div>
-        <div className="flex justify-end w-full">
-          <div className="w-[60%] text-right pr-4">CGST 2.5%:</div>
-          <div className="w-[40%] text-right">{cgst.toFixed(2)}</div>
-        </div>
-        <div className="flex justify-end w-full">
-          <div className="w-[60%] text-right pr-4">SGST 2.5%:</div>
-          <div className="w-[40%] text-right">{sgst.toFixed(2)}</div>
-        </div>
+        {invoice.tax > 0 && (
+          <>
+            <div className="flex justify-end w-full">
+              <div className="w-[60%] text-right pr-4">CGST 2.5%:</div>
+              <div className="w-[40%] text-right">{cgst.toFixed(2)}</div>
+            </div>
+            <div className="flex justify-end w-full">
+              <div className="w-[60%] text-right pr-4">SGST 2.5%:</div>
+              <div className="w-[40%] text-right">{sgst.toFixed(2)}</div>
+            </div>
+          </>
+        )}
         <div className="flex justify-end w-full font-bold mt-1 text-sm">
           <div className="w-[60%] text-right pr-4">Net Amount:</div>
           <div className="w-[40%] text-right">{netAmount.toFixed(2)}</div>

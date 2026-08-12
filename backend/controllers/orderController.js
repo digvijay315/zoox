@@ -1,6 +1,8 @@
 const Order = require("../models/Order");
 const Table = require("../models/Table");
 const Invoice = require("../models/Invoice");
+const Dish = require("../models/Dish");
+const InventoryItem = require("../models/InventoryItem");
 
 // @desc    Create or update order
 // @route   POST /api/orders
@@ -142,7 +144,7 @@ exports.checkoutOrder = async (req, res) => {
 
     let cName = customerName || "Guest";
     if (order.orderType === "Table" && order.table && !customerName) {
-      cName = Table ;
+      cName = `Table ${order.table.tableNo}`;
     } else if (order.orderType !== "Table" && !customerName) {
       cName = order.orderDisplayId;
     }
@@ -166,7 +168,30 @@ exports.checkoutOrder = async (req, res) => {
     // Update Order
     order.status = "Billed";
     order.paymentMode = paymentMode || "Cash";
+    order.customerName = cName;
+    if (customerMobile) {
+      order.customerMobile = customerMobile;
+    }
+    if (customerEmail) {
+      order.customerEmail = customerEmail;
+    }
     await order.save();
+
+    // Deduct stock for ingredients based on the recipe
+    if (order.items && order.items.length > 0) {
+      for (const item of order.items) {
+        const dish = await Dish.findById(item.dishId);
+        if (dish && dish.recipe && dish.recipe.length > 0) {
+          for (const recipeItem of dish.recipe) {
+            const inventoryItem = await InventoryItem.findById(recipeItem.item);
+            if (inventoryItem) {
+              inventoryItem.currentStock -= (recipeItem.quantity * item.quantity);
+              await inventoryItem.save();
+            }
+          }
+        }
+      }
+    }
 
     // Free the table if applicable
     if (order.orderType === "Table" && order.table) {

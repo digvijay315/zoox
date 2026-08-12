@@ -5,7 +5,7 @@ const Dish = require("../models/Dish");
 // @access  Private (both staff and admin)
 const getDishes = async (req, res) => {
   try {
-    const dishes = await Dish.find({});
+    const dishes = await Dish.find({}).populate("recipe.item", "name unit currentStock");
     res.json({ success: true, dishes });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -16,7 +16,7 @@ const getDishes = async (req, res) => {
 // @route   POST /api/dishes
 // @access  Private/Admin
 const addDish = async (req, res) => {
-  const { name, price, image, category } = req.body;
+  const { name, price, image, category, recipe } = req.body;
 
   try {
     if (!name || !price || !image) {
@@ -33,6 +33,7 @@ const addDish = async (req, res) => {
       price: Number(price),
       image,
       category: category || "General",
+      recipe: recipe || [],
     });
 
     res.status(201).json({ success: true, dish });
@@ -45,7 +46,7 @@ const addDish = async (req, res) => {
 // @route   PUT /api/dishes/:id
 // @access  Private/Admin
 const updateDish = async (req, res) => {
-  const { name, price, image, category, available } = req.body;
+  const { name, price, image, category, available, recipe } = req.body;
 
   try {
     const dish = await Dish.findOne({ _id: req.params.id });
@@ -59,6 +60,9 @@ const updateDish = async (req, res) => {
     dish.image = image || dish.image;
     dish.category = category || dish.category;
     dish.available = available !== undefined ? available : dish.available;
+    if (recipe !== undefined) {
+      dish.recipe = recipe;
+    }
 
     const updatedDish = await dish.save();
     res.json({ success: true, dish: updatedDish });

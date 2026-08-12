@@ -24,6 +24,7 @@ export default function StaffBilling() {
   const [generatedInvoice, setGeneratedInvoice] = useState(null);
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState(["All"]);
+  const [applyGST, setApplyGST] = useState(true);
 
   // Room Billing feature
   const [billType, setBillType] = useState("Walk-in"); // "Walk-in" or "Room"
@@ -122,7 +123,7 @@ export default function StaffBilling() {
   };
 
   const subTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const tax = Math.round((subTotal * 0.05) * 100) / 100; // 5% GST
+  const tax = applyGST ? Math.round((subTotal * 0.05) * 100) / 100 : 0; // 5% GST
   const grandTotal = Math.round((subTotal + tax) * 100) / 100;
   const returnAmount = receivedAmount ? Number(receivedAmount) - grandTotal : 0;
 
@@ -352,14 +353,22 @@ export default function StaffBilling() {
           </div>
 
           <div className="p-4 border-t border-slate-800 bg-slate-900/30 rounded-b-2xl divide-y divide-slate-800/80">
+            <div className="py-2">
+              <label className="text-xs text-slate-300 flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={applyGST} onChange={(e) => setApplyGST(e.target.checked)} className="accent-amber-500" />
+                Apply 5% GST
+              </label>
+            </div>
             <div className="flex justify-between text-xs py-1.5 text-slate-400">
               <span>Subtotal</span>
               <span className="font-mono text-slate-200">₹{subTotal.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between text-xs py-1.5 text-slate-400">
-              <span>GST (5%)</span>
-              <span className="font-mono text-slate-200">₹{tax.toFixed(2)}</span>
-            </div>
+            {applyGST && (
+              <div className="flex justify-between text-xs py-1.5 text-slate-400">
+                <span>GST (5%)</span>
+                <span className="font-mono text-slate-200">₹{tax.toFixed(2)}</span>
+              </div>
+            )}
             <div className="flex justify-between text-sm py-2 font-bold text-slate-100">
               <span>Grand Total</span>
               <span className="font-mono text-amber-400">₹{grandTotal.toFixed(2)}</span>

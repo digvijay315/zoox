@@ -17,11 +17,27 @@ export default function AdminDishes() {
   const [formSubmitLoading, setFormSubmitLoading] = useState(false);
   const [msg, setMsg] = useState({ text: "", type: "" });
   const [categories, setCategories] = useState([]);
+  
+  // Recipe related states
+  const [inventoryItems, setInventoryItems] = useState([]);
+  const [recipe, setRecipe] = useState([]); // Array of { item: "", quantity: "", unit: "kg" }
 
   useEffect(() => {
     fetchDishes();
     fetchCategories();
+    fetchInventoryItems();
   }, []);
+
+  const fetchInventoryItems = async () => {
+    try {
+      const res = await api.get("/api/inventory/items?limit=1000");
+      if (res.data.success) {
+        setInventoryItems(res.data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching inventory items:", error);
+    }
+  };
 
   const fetchCategories = async () => {
     try {
@@ -89,11 +105,19 @@ export default function AdminDishes() {
     setMsg({ text: "", type: "" });
 
     try {
+      // Filter out any recipe items that have no item selected or quantity <= 0
+      const validRecipe = recipe.filter(r => r.item && Number(r.quantity) > 0).map(r => ({
+        item: r.item,
+        quantity: Number(r.quantity),
+        unit: r.unit
+      }));
+
       const res = await api.post("api/dishes", {
         name,
         price: Number(price),
         category,
         image,
+        recipe: validRecipe,
       });
 
       if (res.data.success) {
@@ -103,6 +127,7 @@ export default function AdminDishes() {
         setPrice("");
         setCategory("");
         setImage("");
+        setRecipe([]);
         
         // Refresh list
         fetchDishes();
@@ -116,6 +141,31 @@ export default function AdminDishes() {
     } finally {
       setFormSubmitLoading(false);
     }
+  };
+
+  const addRecipeRow = () => {
+    setRecipe([...recipe, { item: "", quantity: "", unit: "kg" }]);
+  };
+
+  const removeRecipeRow = (index) => {
+    const newRecipe = [...recipe];
+    newRecipe.splice(index, 1);
+    setRecipe(newRecipe);
+  };
+
+  const updateRecipeRow = (index, field, value) => {
+    const newRecipe = [...recipe];
+    newRecipe[index][field] = value;
+    
+    // Auto-fill unit if item is selected
+    if (field === 'item' && value) {
+      const selectedItem = inventoryItems.find(i => i._id === value);
+      if (selectedItem && selectedItem.unit) {
+        newRecipe[index].unit = selectedItem.unit;
+      }
+    }
+    
+    setRecipe(newRecipe);
   };
 
   const handleToggleAvailability = async (dish) => {
@@ -343,6 +393,70 @@ export default function AdminDishes() {
                   disabled={loading === "dishImage"}
                 />
               </div>
+            </div>
+
+            {/* Recipe Configuration */}
+            <div className="pt-2 border-t border-slate-800">
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  Recipe (Optional)
+                </label>
+                <button
+                  type="button"
+                  onClick={addRecipeRow}
+                  className="text-[10px] text-amber-500 hover:text-amber-400 flex items-center gap-1 font-bold"
+                >
+                  <PlusCircle className="w-3 h-3" /> Add Item
+                </button>
+              </div>
+              
+              {recipe.map((r, index) => (
+                <div key={index} className="flex gap-2 mb-2 items-start">
+                  <div className="flex-1">
+                    <select
+                      value={r.item}
+                      onChange={(e) => updateRecipeRow(index, 'item', e.target.value)}
+                      className="w-full bg-slate-900/60 border border-slate-800 text-slate-200 rounded-lg px-2 py-1.5 text-xs outline-none focus:border-amber-500/60"
+                    >
+                      <option value="">Select Inventory Item</option>
+                      {inventoryItems.map(inv => (
+                        <option key={inv._id} value={inv._id}>{inv.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="w-16">
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={r.quantity}
+                      onChange={(e) => updateRecipeRow(index, 'quantity', e.target.value)}
+                      placeholder="Qty"
+                      className="w-full bg-slate-900/60 border border-slate-800 text-slate-200 rounded-lg px-2 py-1.5 text-xs outline-none focus:border-amber-500/60"
+                    />
+                  </div>
+                  <div className="w-12">
+                    <input
+                      type="text"
+                      value={r.unit}
+                      readOnly
+                      className="w-full bg-slate-800 border border-slate-800 text-slate-400 rounded-lg px-2 py-1.5 text-xs outline-none text-center cursor-not-allowed"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeRecipeRow(index)}
+                    className="p-1.5 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+              {recipe.length === 0 && (
+                <p className="text-[10px] text-slate-500 text-center py-2 bg-slate-900/30 rounded-lg border border-dashed border-slate-800">
+                  No recipe items added.
+                </p>
+              )}
             </div>
 
             <button

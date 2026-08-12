@@ -33,6 +33,7 @@ export default function StaffKotBilling() {
   const [loading, setLoading] = useState(false);
   const [generatedInvoice, setGeneratedInvoice] = useState(null);
   const [isKotPrint, setIsKotPrint] = useState(false);
+  const [applyGST, setApplyGST] = useState(true);
 
   useEffect(() => {
     fetchTables();
@@ -166,7 +167,7 @@ export default function StaffKotBilling() {
   };
 
   const subTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const tax = Math.round((subTotal * 0.05) * 100) / 100; // 5% GST
+  const tax = applyGST ? Math.round((subTotal * 0.05) * 100) / 100 : 0; // 5% GST
   const grandTotal = Math.round((subTotal + tax) * 100) / 100;
 
   const handleSaveOrder = async () => {
@@ -451,8 +452,14 @@ export default function StaffKotBilling() {
           </div>
 
           <div className="p-4 bg-slate-900/40 border-t border-slate-800 rounded-b-2xl">
+            <div className="flex justify-between items-center mb-2">
+              <label className="text-xs text-slate-300 flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={applyGST} onChange={(e) => setApplyGST(e.target.checked)} className="accent-amber-500" />
+                Apply 5% GST
+              </label>
+            </div>
             <div className="flex justify-between text-xs py-1 text-slate-400"><span>Subtotal</span><span>₹{subTotal.toFixed(2)}</span></div>
-            <div className="flex justify-between text-xs py-1 text-slate-400"><span>GST (5%)</span><span>₹{tax.toFixed(2)}</span></div>
+            {applyGST && <div className="flex justify-between text-xs py-1 text-slate-400"><span>GST (5%)</span><span>₹{tax.toFixed(2)}</span></div>}
             <div className="flex justify-between font-bold text-slate-100 py-1.5 border-t border-slate-700 mt-1"><span>Grand Total</span><span className="text-amber-400">₹{grandTotal.toFixed(2)}</span></div>
             
             <div className="mt-4 flex flex-col gap-2">

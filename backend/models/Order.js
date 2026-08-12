@@ -60,6 +60,18 @@ const orderSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    customerName: {
+      type: String,
+      default: null,
+    },
+    customerMobile: {
+      type: String,
+      default: null,
+    },
+    customerEmail: {
+      type: String,
+      default: null,
+    },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
