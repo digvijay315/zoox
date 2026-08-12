@@ -5,7 +5,7 @@ import { tableAPI } from "../../api";
 
 export default function AdminTables() {
   const [tables, setTables] = useState([]);
-  const [formData, setFormData] = useState({ tableNo: "", capacity: "" });
+  const [formData, setFormData] = useState({ tableNo: "", capacity: "", type: "Table" });
 
   const fetchTables = async () => {
     try {
@@ -25,7 +25,7 @@ export default function AdminTables() {
     try {
       await tableAPI.createTable(formData);
       showSuccess("Added!", "Table has been added.");
-      setFormData({ tableNo: "", capacity: "" });
+      setFormData({ tableNo: "", capacity: "", type: "Table" });
       fetchTables();
     } catch (error) {
       showError("Error!", error.response?.data?.message || "Something went wrong.");
@@ -71,7 +71,18 @@ export default function AdminTables() {
             </h2>
             <form onSubmit={handleAddTable} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-400 mb-1">Table Number</label>
+                <label className="block text-sm font-medium text-slate-400 mb-1">Type</label>
+                <select
+                  className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/50 transition-all"
+                  value={formData.type}
+                  onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                >
+                  <option value="Table">Table</option>
+                  <option value="Cabin">Cabin</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-400 mb-1">Number / Name</label>
                 <input
                   type="text"
                   required
@@ -82,11 +93,10 @@ export default function AdminTables() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-400 mb-1">Seating Capacity</label>
+                <label className="block text-sm font-medium text-slate-400 mb-1">Seating Capacity (Optional)</label>
                 <input
                   type="number"
-                  required
-                  min="1"
+                  min="0"
                   placeholder="e.g. 4"
                   className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/50 transition-all"
                   value={formData.capacity}
@@ -109,13 +119,15 @@ export default function AdminTables() {
               <div key={table._id} className="glass p-4 rounded-xl border border-slate-700/50 hover:border-amber-500/30 transition-all flex flex-col justify-between group">
                 <div>
                   <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-xl font-bold text-amber-400">{table.tableNo}</h3>
+                    <h3 className="text-xl font-bold text-amber-400">
+                      {table.type === 'Cabin' ? 'Cabin ' : 'Table '}{table.tableNo}
+                    </h3>
                     <div className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full ${table.status === 'Available' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
                       {table.status}
                     </div>
                   </div>
                   <p className="text-slate-400 text-sm flex items-center gap-1">
-                    <Users className="w-4 h-4" /> {table.capacity} Seater
+                    <Users className="w-4 h-4" /> {table.capacity > 0 ? `${table.capacity} Seater` : 'Capacity N/A'}
                   </p>
                 </div>
                 <div className="mt-4 pt-3 border-t border-slate-800 flex justify-end opacity-0 group-hover:opacity-100 transition-opacity">

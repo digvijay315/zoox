@@ -6,14 +6,14 @@ const Order = require("../models/Order");
 // @access  Admin
 exports.createTable = async (req, res) => {
   try {
-    const { tableNo, capacity } = req.body;
+    const { tableNo, capacity, type } = req.body;
 
     const existingTable = await Table.findOne({ tableNo });
     if (existingTable) {
       return res.status(400).json({ success: false, message: "Table already exists" });
     }
 
-    const table = await Table.create({ tableNo, capacity });
+    const table = await Table.create({ tableNo, capacity: capacity || 0, type: type || "Table" });
     res.status(201).json({ success: true, data: table });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
