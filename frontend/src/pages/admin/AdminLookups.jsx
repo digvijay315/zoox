@@ -328,7 +328,7 @@ export default function AdminLookups({ isComponent = false }) {
                   />
                 </div>
 
-                <div>
+                {/* <div>
                   <label className="block text-sm font-medium text-slate-400 mb-1">Parent (Optional)</label>
                   <select
                     value={formData.parent}
@@ -336,14 +336,14 @@ export default function AdminLookups({ isComponent = false }) {
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-slate-200 focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/50"
                   >
                     <option value="">-- No Parent --</option>
-                    {/* Only show potential parents of the same type, exclude self if editing */}
+                    
                     {allLookups
                       .filter(l => l.type === formData.type && l._id !== formData.id)
                       .map(l => (
                         <option key={l._id} value={l._id}>{l.name}</option>
                     ))}
                   </select>
-                </div>
+                </div> */}
 
                 <div className="flex items-center gap-3 pt-2">
                   <input

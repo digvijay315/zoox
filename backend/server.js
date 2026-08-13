@@ -71,62 +71,62 @@ const seedAdmin = async () => {
 };
 
 // Seed Default Menu Dishes if none exist
-const seedDishes = async () => {
-  try {
-    const dishCount = await Dish.countDocuments();
-    if (dishCount === 0) {
-      console.log("No menu dishes found. Seeding default items...");
-      const defaultDishes = [
-        {
-          name: "Veg Thali Special",
-          price: 150,
-          category: "Veg Thali",
-          image: "https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?w=600&auto=format&fit=crop&q=60"
-        },
-        {
-          name: "Paneer Butter Masala",
-          price: 180,
-          category: "Paneer",
-          image: "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=600&auto=format&fit=crop&q=60"
-        },
-        {
-          name: "Fresh Sweet Dahi",
-          price: 40,
-          category: "Dahi",
-          image: "https://images.unsplash.com/photo-1571244856353-fb08f55d283f?w=600&auto=format&fit=crop&q=60"
-        },
-        {
-          name: "Gulab Jamun (Sweets)",
-          price: 50,
-          category: "Sweets",
-          image: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=600&auto=format&fit=crop&q=60"
-        },
-        {
-          name: "Special Dal Makhani",
-          price: 120,
-          category: "Veg Thali",
-          image: "https://images.unsplash.com/photo-1585857188825-7d2cfcfb0155?w=600&auto=format&fit=crop&q=60"
-        },
-        {
-          name: "Butter Naan",
-          price: 30,
-          category: "Rice & Bread",
-          image: "https://images.unsplash.com/photo-1601050690597-df056fb4ce78?w=600&auto=format&fit=crop&q=60"
-        }
-      ];
-      await Dish.insertMany(defaultDishes);
-      console.log("Default menu dishes seeded successfully!");
-    }
-  } catch (error) {
-    console.error(`Error seeding dishes: ${error.message}`);
-  }
-};
+// const seedDishes = async () => {
+//   try {
+//     const dishCount = await Dish.countDocuments();
+//     if (dishCount === 0) {
+//       console.log("No menu dishes found. Seeding default items...");
+//       const defaultDishes = [
+//         {
+//           name: "Veg Thali Special",
+//           price: 150,
+//           category: "Veg Thali",
+//           image: "https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?w=600&auto=format&fit=crop&q=60"
+//         },
+//         {
+//           name: "Paneer Butter Masala",
+//           price: 180,
+//           category: "Paneer",
+//           image: "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=600&auto=format&fit=crop&q=60"
+//         },
+//         {
+//           name: "Fresh Sweet Dahi",
+//           price: 40,
+//           category: "Dahi",
+//           image: "https://images.unsplash.com/photo-1571244856353-fb08f55d283f?w=600&auto=format&fit=crop&q=60"
+//         },
+//         {
+//           name: "Gulab Jamun (Sweets)",
+//           price: 50,
+//           category: "Sweets",
+//           image: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=600&auto=format&fit=crop&q=60"
+//         },
+//         {
+//           name: "Special Dal Makhani",
+//           price: 120,
+//           category: "Veg Thali",
+//           image: "https://images.unsplash.com/photo-1585857188825-7d2cfcfb0155?w=600&auto=format&fit=crop&q=60"
+//         },
+//         {
+//           name: "Butter Naan",
+//           price: 30,
+//           category: "Rice & Bread",
+//           image: "https://images.unsplash.com/photo-1601050690597-df056fb4ce78?w=600&auto=format&fit=crop&q=60"
+//         }
+//       ];
+//       await Dish.insertMany(defaultDishes);
+//       console.log("Default menu dishes seeded successfully!");
+//     }
+//   } catch (error) {
+//     console.error(`Error seeding dishes: ${error.message}`);
+//   }
+// };
 
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, async () => {
   console.log(`Server running on port ${PORT}`);
   await seedAdmin();
-  await seedDishes();
+  // await seedDishes();
 });
 

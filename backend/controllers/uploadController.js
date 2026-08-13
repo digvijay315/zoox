@@ -35,6 +35,14 @@ const uploadToCloudinary = async (req, res) => {
         overwrite: false,
       };
 
+      if (resourceType === "image") {
+        options.transformation = [
+          { width: 1200, crop: "limit" }, 
+          { quality: "auto" },
+          { fetch_format: "auto" }
+        ];
+      }
+
       // Only force mp4 + h264 if it’s a video
       if (resourceType === "video") {
         options.format = "mp4";
