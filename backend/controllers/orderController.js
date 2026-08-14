@@ -203,7 +203,12 @@ exports.checkoutOrder = async (req, res) => {
       }
     }
 
-    res.status(200).json({ success: true, data: invoice });
+    const invoiceObj = invoice.toObject();
+    if (order.table) {
+      invoiceObj.tableNo = order.table.tableNo;
+    }
+
+    res.status(200).json({ success: true, data: invoiceObj });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

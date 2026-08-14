@@ -47,15 +47,39 @@ const getDishes = async (req, res) => {
   }
 };
 
+const getDefaultImageForCategory = (category) => {
+  const cat = (category || "").toLowerCase();
+  
+  if (cat === "salad") return "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&auto=format&fit=crop&q=60";
+  if (cat === "soup") return "https://images.unsplash.com/photo-1547592180-85f173990554?w=600&auto=format&fit=crop&q=60";
+  if (cat === "continental appetizers") return "https://images.unsplash.com/photo-1626804475297-41609ea004eb?w=600&auto=format&fit=crop&q=60";
+  if (cat === "pizza") return "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600&auto=format&fit=crop&q=60";
+  if (cat === "pasta") return "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=600&auto=format&fit=crop&q=60";
+  if (cat === "asian appetizers") return "https://images.unsplash.com/photo-1541529086526-db283c563270?w=600&auto=format&fit=crop&q=60";
+  if (cat === "tandoor e dastaan") return "https://images.unsplash.com/photo-1603894584373-5ac82b6ae398?w=600&auto=format&fit=crop&q=60"; // Tandoori
+  if (cat === "s.s kebeb platter") return "https://images.unsplash.com/photo-1599487405270-45ab10e303d8?w=600&auto=format&fit=crop&q=60"; // Kebab
+  if (cat === "continental main course") return "https://images.unsplash.com/photo-1544025162-811c7fae1363?w=600&auto=format&fit=crop&q=60"; // Steak / Continental
+  if (cat === "chinese main course") return "https://images.unsplash.com/photo-1525755662778-989d0524087e?w=600&auto=format&fit=crop&q=60";
+  if (cat === "indian main course") return "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=600&auto=format&fit=crop&q=60";
+  if (cat === "roti e mela") return "https://images.unsplash.com/photo-1626082895617-2c6ab38fc6f2?w=600&auto=format&fit=crop&q=60"; // Naan / Roti
+  if (cat === "desi chawal") return "https://images.unsplash.com/photo-1516684732162-798a0062be99?w=600&auto=format&fit=crop&q=60"; // Plain rice
+  if (cat === "biryani") return "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=600&auto=format&fit=crop&q=60";
+  if (cat === "chinese rice & noodles") return "https://images.unsplash.com/photo-1585032226651-759b368d7246?w=600&auto=format&fit=crop&q=60"; // Noodles
+  if (cat === "desserts") return "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=600&auto=format&fit=crop&q=60";
+
+  // Default General Food Image for anything else
+  return "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=60";
+};
+
 // @desc    Add a new dish
 // @route   POST /api/dishes
 // @access  Private/Admin
 const addDish = async (req, res) => {
-  const { name, price, image, category, recipe } = req.body;
+  const { name, price, image, category, recipe, dishId } = req.body;
 
   try {
-    if (!name || !price || !image) {
-      return res.status(400).json({ success: false, message: "Please enter name, price, and upload an image" });
+    if (!name || !price) {
+      return res.status(400).json({ success: false, message: "Please enter name and price" });
     }
 
     const dishExists = await Dish.findOne({ name });
@@ -64,9 +88,10 @@ const addDish = async (req, res) => {
     }
 
     const dish = await Dish.create({
+      dishId,
       name,
       price: Number(price),
-      image,
+      image: image || getDefaultImageForCategory(category),
       category: category || "General",
       recipe: recipe || [],
     });
@@ -81,7 +106,7 @@ const addDish = async (req, res) => {
 // @route   PUT /api/dishes/:id
 // @access  Private/Admin
 const updateDish = async (req, res) => {
-  const { name, price, image, category, available, recipe } = req.body;
+  const { name, price, image, category, available, recipe, dishId } = req.body;
 
   try {
     const dish = await Dish.findOne({ _id: req.params.id });
@@ -95,6 +120,7 @@ const updateDish = async (req, res) => {
     dish.image = image || dish.image;
     dish.category = category || dish.category;
     dish.available = available !== undefined ? available : dish.available;
+    if (dishId) dish.dishId = dishId;
     if (recipe !== undefined) {
       dish.recipe = recipe;
     }

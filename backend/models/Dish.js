@@ -2,6 +2,11 @@ const mongoose = require("mongoose");
 
 const dishSchema = new mongoose.Schema(
   {
+    dishId: {
+      type: String,
+      unique: true,
+      sparse: true
+    },
     name: {
       type: String,
       required: true,
@@ -13,7 +18,7 @@ const dishSchema = new mongoose.Schema(
     },
     image: {
       type: String, // Cloudinary Image URL
-      required: true,
+      default: "",
     },
     category: {
       type: String,

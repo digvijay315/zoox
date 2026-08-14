@@ -103,7 +103,7 @@ export default function StaffBilling() {
         ...cart,
         {
           dishId: dish._id,
-          name: dish.name,
+          name: dish.dishId ? `[${dish.dishId}] ${dish.name}` : dish.name,
           price: dish.price,
           quantity: 1,
         },
@@ -277,10 +277,13 @@ export default function StaffBilling() {
                   </div>
                   <div className="p-2.5 flex flex-col gap-1.5 flex-1">
                     <div>
-                      <h3 className="font-bold text-sm text-slate-100 leading-snug break-words">
-                        {dish.name}
-                      </h3>
-                      <p className="text-[9px] text-slate-500 font-medium uppercase tracking-wider mt-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="font-bold text-sm text-slate-100 line-clamp-2 leading-snug break-words">
+                          {dish.name}
+                        </h3>
+                        {dish.dishId && <span className="shrink-0 text-[10px] bg-slate-800 text-amber-500/80 px-1.5 py-0.5 rounded border border-slate-700/50 whitespace-nowrap">{dish.dishId}</span>}
+                      </div>
+                      <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider mt-1">
                         {dish.category}
                       </p>
                     </div>
@@ -344,7 +347,7 @@ export default function StaffBilling() {
               cart.map((item) => (
                 <div key={item.dishId} className="py-3.5 flex items-center justify-between gap-4">
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold text-slate-200 truncate">{item.name}</p>
+                    <p className="text-xs font-semibold text-slate-200 line-clamp-2">{item.name}</p>
                     <p className="text-[10px] text-amber-500 font-mono mt-0.5">
                       ₹{item.price} × {item.quantity}
                     </p>

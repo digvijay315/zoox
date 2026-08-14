@@ -26,7 +26,7 @@ export default function ThermalReceipt({ invoice, onClose, isKot = false }) {
   const hEmail = currentUser?.hotelEmail || "";
   const hCashier = invoice.createdBy?.name || currentUser?.name || "STAFF";
   const hLogo = currentUser?.hotelLogo || "";
-  const hGst = currentUser?.hotelGstNo || "";
+  const hGst = currentUser?.hotelGstNo || "20BYUPR1894L1ZN";
   const hCin = currentUser?.hotelCinNo || "";
 
   const checkInDate = new Date(invoice.createdAt || Date.now());
@@ -36,7 +36,7 @@ export default function ThermalReceipt({ invoice, onClose, isKot = false }) {
   const safeId = invoice._id ? invoice._id.toString() : "NEW123";
   const kotNo = invoice.kotNumber || invoice.invoiceNumber || safeId.substring(Math.max(0, safeId.length - 6)).toUpperCase();
   const billNo = invoice.invoiceNumber || safeId.substring(Math.max(0, safeId.length - 6)).toUpperCase();
-  const tableNo = invoice.table ? invoice.table.tableNumber : invoice.tableNo || 'N/A';
+  const tableNo = (invoice.table && invoice.table.tableNo) ? invoice.table.tableNo : invoice.tableNo || 'N/A';
 
   let subTotal = 0;
   if (invoice.items) {

@@ -165,7 +165,8 @@ export default function StaffKotBilling() {
     if (existing) {
       setCart(cart.map((item) => item.dishId === dish._id ? { ...item, quantity: item.quantity + 1 } : item));
     } else {
-      setCart([...cart, { dishId: dish._id, name: dish.name, price: dish.price, quantity: 1 }]);
+      const displayName = dish.dishId ? `[${dish.dishId}] ${dish.name}` : dish.name;
+      setCart([...cart, { dishId: dish._id, name: displayName, price: dish.price, quantity: 1 }]);
     }
   };
 
@@ -455,12 +456,13 @@ export default function StaffKotBilling() {
                 </div>
                 <div className="p-2.5 flex flex-col gap-1.5 flex-1">
                   <div>
-                    <h3 className="font-bold text-sm text-slate-100 leading-snug break-words">
-                      {dish.name}
-                    </h3>
-                    <p className="text-[9px] text-slate-500 font-medium uppercase tracking-wider mt-1">
-                      {dish.category}
-                    </p>
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className="font-bold text-sm text-slate-100 line-clamp-2 leading-snug break-words">
+                        {dish.name}
+                      </h3>
+                      {dish.dishId && <span className="shrink-0 text-[10px] bg-slate-800 text-amber-500/80 px-1.5 py-0.5 rounded border border-slate-700/50 whitespace-nowrap">{dish.dishId}</span>}
+                    </div>
+                    <p className="text-[10px] text-slate-500 uppercase tracking-widest mt-0.5">{dish.category}</p>
                   </div>
                   <button className="w-full mt-auto py-1.5 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-amber-500/20 group-hover:bg-amber-500/10 group-hover:text-amber-500 rounded-lg text-[10px] font-bold uppercase tracking-wider flex items-center justify-center gap-1 transition-all">
                     <span>Add to Cart</span>
@@ -508,7 +510,7 @@ export default function StaffKotBilling() {
               cart.map((item) => (
                 <div key={item.dishId} className="py-2 flex justify-between items-center gap-2">
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold text-slate-200 truncate">{item.name}</p>
+                    <p className="text-xs font-bold text-slate-200 line-clamp-2">{item.name}</p>
                     <p className="text-[10px] text-amber-500">₹{item.price}</p>
                   </div>
                   <div className="flex items-center gap-1.5">

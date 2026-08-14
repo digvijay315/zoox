@@ -7,6 +7,7 @@ export default function AdminDishes() {
   const [dishes, setDishes] = useState([]);
   
   // Form fields
+  const [dishId, setDishId] = useState("");
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [category, setCategory] = useState("");
@@ -78,6 +79,36 @@ export default function AdminDishes() {
     }
   };
 
+  const generateDishId = async () => {
+    if (!category) {
+      showError("Category Required", "Please select a category first.");
+      return;
+    }
+    try {
+      const res = await api.get(`/api/dishes?category=${category}&limit=1`);
+      const prefixMap = {
+        "Salad": "SA", "Soup": "SO", "Continental Appetizers": "CA", "Pizza": "PZ",
+        "Pasta": "PA", "Asian Appetizers": "AA", "Tandoor E Dastaan": "TD", "S.S Kebeb Platter": "SS",
+        "Continental Main course": "CM", "Chinese Main course": "CH", "Indian Main Course": "IM",
+        "Roti E Mela": "RM", "Desi chawal": "DC", "Biryani": "BI", "Chinese Rice & Noodles": "CN",
+        "Desserts": "DE"
+      };
+      
+      const count = res.data.pagination ? res.data.pagination.totalItems : 0;
+      let prefix = prefixMap[category];
+      if (!prefix) {
+        const cleanCat = category.replace(/[^A-Za-z]/g, '');
+        prefix = cleanCat.substring(0, 2).toUpperCase() || "XX";
+      }
+      const nextIndex = count + 1;
+      setDishId(`${prefix}${nextIndex.toString().padStart(2, '0')}`);
+      setMsg({ text: "Dish ID generated!", type: "success" });
+    } catch (error) {
+      console.error("Error generating dish id:", error);
+      showError("Error", "Failed to generate Dish ID");
+    }
+  };
+
   // 🧩 Common upload handler (exactly aligned with User's code snippet)
   const handleFileChange = async (e, fieldName) => {
     const files = Array.from(e.target.files);
@@ -109,10 +140,7 @@ export default function AdminDishes() {
 
   const handleSubmitDish = async (e) => {
     e.preventDefault();
-    if (!image) {
-      showError("Image Required", "Please upload a dish image first.");
-      return;
-    }
+
     if (!category) {
       showError("Category Required", "Please select a category.");
       return;
@@ -130,6 +158,7 @@ export default function AdminDishes() {
       }));
 
       const payload = {
+        dishId,
         name,
         price: Number(price),
         category,
@@ -165,6 +194,7 @@ export default function AdminDishes() {
 
   const handleEditDish = (dish) => {
     setEditingDishId(dish._id);
+    setDishId(dish.dishId || "");
     setName(dish.name);
     setPrice(dish.price);
     setCategory(dish.category);
@@ -181,6 +211,7 @@ export default function AdminDishes() {
 
   const handleCancelEdit = () => {
     setEditingDishId(null);
+    setDishId("");
     setName("");
     setPrice("");
     setCategory("");
@@ -305,7 +336,12 @@ export default function AdminDishes() {
 
                   <div className="p-3.5 flex flex-col gap-2">
                     <div>
-                      <h4 className="font-bold text-xs text-slate-150 truncate">{dish.name}</h4>
+                      <div className="flex items-start justify-between gap-2">
+                        <h4 className="font-bold text-xs text-slate-150 line-clamp-2 leading-tight">
+                          {dish.name}
+                        </h4>
+                        {dish.dishId && <span className="shrink-0 text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded border border-slate-700 whitespace-nowrap">{dish.dishId}</span>}
+                      </div>
                       <p className="text-[9px] text-slate-500 uppercase tracking-widest mt-0.5">{dish.category}</p>
                     </div>
 
@@ -453,6 +489,28 @@ export default function AdminDishes() {
               </select>
             </div>
 
+            <div>
+              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                Dish ID
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={dishId}
+                  onChange={(e) => setDishId(e.target.value)}
+                  placeholder="e.g. PI01"
+                  className="flex-1 bg-slate-900/60 border border-slate-800 text-slate-100 rounded-xl px-3 py-2 text-xs outline-none focus:border-amber-500/60"
+                />
+                <button
+                  type="button"
+                  onClick={generateDishId}
+                  className="px-3 py-2 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded-xl text-xs font-semibold hover:bg-amber-500/20 transition-colors whitespace-nowrap"
+                >
+                  Generate
+                </button>
+              </div>
+            </div>
+
             {/* Cloudinary Image Upload Area */}
             <div>
               <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
@@ -557,7 +615,7 @@ export default function AdminDishes() {
 
             <button
               type="submit"
-              disabled={formSubmitLoading || !image}
+              disabled={formSubmitLoading}
               className="w-full py-3 bg-gradient-to-r from-amber-600 to-yellow-500 hover:from-amber-500 hover:to-yellow-400 text-slate-950 font-bold rounded-xl shadow-lg shadow-amber-600/15 active:scale-[0.98] transition-all flex items-center justify-center text-xs disabled:opacity-50"
             >
               {formSubmitLoading ? "Saving..." : (editingDishId ? "Update Dish" : "Add to Catalog")}
