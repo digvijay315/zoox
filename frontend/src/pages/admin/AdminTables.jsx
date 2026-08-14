@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { UtensilsCrossed, Plus, Trash2, Users } from "lucide-react";
+import { UtensilsCrossed, Plus, Trash2, Users, Edit } from "lucide-react";
 import { showSuccess, showError, showConfirm } from "../../utils/alerts";
 import { tableAPI } from "../../api";
 
 export default function AdminTables() {
   const [tables, setTables] = useState([]);
   const [formData, setFormData] = useState({ tableNo: "", capacity: "", type: "Table" });
+  const [editingTableId, setEditingTableId] = useState(null);
 
   const fetchTables = async () => {
     try {
@@ -20,16 +21,35 @@ export default function AdminTables() {
     fetchTables();
   }, []);
 
-  const handleAddTable = async (e) => {
+  const handleSubmitTable = async (e) => {
     e.preventDefault();
     try {
-      await tableAPI.createTable(formData);
-      showSuccess("Added!", "Table has been added.");
-      setFormData({ tableNo: "", capacity: "", type: "Table" });
+      if (editingTableId) {
+        await tableAPI.updateTable(editingTableId, formData);
+        showSuccess("Updated!", "Table has been updated.");
+      } else {
+        await tableAPI.createTable(formData);
+        showSuccess("Added!", "Table has been added.");
+      }
+      handleCancelEdit();
       fetchTables();
     } catch (error) {
       showError("Error!", error.response?.data?.message || "Something went wrong.");
     }
+  };
+
+  const handleEditTable = (table) => {
+    setEditingTableId(table._id);
+    setFormData({
+      tableNo: table.tableNo,
+      capacity: table.capacity || "",
+      type: table.type || "Table"
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingTableId(null);
+    setFormData({ tableNo: "", capacity: "", type: "Table" });
   };
 
   const handleDeleteTable = async (id) => {
@@ -66,10 +86,17 @@ export default function AdminTables() {
         <div className="lg:col-span-1">
           <div className="glass p-6 rounded-2xl border border-gold-800/20 shadow-xl relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-500 to-yellow-400"></div>
-            <h2 className="text-xl font-bold text-slate-200 mb-6 flex items-center gap-2">
-              <Plus className="text-amber-500 w-5 h-5" /> Add New Table
-            </h2>
-            <form onSubmit={handleAddTable} className="space-y-4">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-slate-200 flex items-center gap-2">
+                <Plus className="text-amber-500 w-5 h-5" /> {editingTableId ? "Edit Table" : "Add New Table"}
+              </h2>
+              {editingTableId && (
+                <button onClick={handleCancelEdit} className="text-xs text-slate-400 hover:text-slate-200 transition-colors">
+                  Cancel
+                </button>
+              )}
+            </div>
+            <form onSubmit={handleSubmitTable} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-slate-400 mb-1">Type</label>
                 <select
@@ -107,7 +134,7 @@ export default function AdminTables() {
                 type="submit"
                 className="w-full bg-gradient-to-r from-amber-600 to-yellow-500 hover:from-amber-500 hover:to-yellow-400 text-slate-950 font-bold py-3 px-4 rounded-xl shadow-lg shadow-amber-500/20 transition-all transform hover:scale-[1.02] active:scale-95"
               >
-                Save Table
+                {editingTableId ? "Update Table" : "Save Table"}
               </button>
             </form>
           </div>
@@ -130,7 +157,14 @@ export default function AdminTables() {
                     <Users className="w-4 h-4" /> {table.capacity > 0 ? `${table.capacity} Seater` : 'Capacity N/A'}
                   </p>
                 </div>
-                <div className="mt-4 pt-3 border-t border-slate-800 flex justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="mt-4 pt-3 border-t border-slate-800 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={() => handleEditTable(table)}
+                    className="p-1.5 text-slate-400 hover:text-blue-400 hover:bg-blue-400/10 rounded-lg transition-colors"
+                    title="Edit Table"
+                  >
+                    <Edit className="w-4 h-4" />
+                  </button>
                   <button
                     onClick={() => handleDeleteTable(table._id)}
                     className="p-1.5 text-slate-400 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors"

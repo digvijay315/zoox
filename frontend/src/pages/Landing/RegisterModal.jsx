@@ -107,7 +107,7 @@ const RegisterModal = ({ isOpen, onClose }) => {
                     <CheckCircle2 className="w-10 h-10" />
                   </div>
                   <h3 className="text-2xl font-bold text-slate-900 mb-2">Registration Successful!</h3>
-                  <p className="text-slate-600 mb-8">Welcome to Secure Billing Pro, <span className="font-semibold text-slate-900">{successData.hotelName}</span>.</p>
+                  <p className="text-slate-600 mb-8">Welcome to Zoox, <span className="font-semibold text-slate-900">{successData.hotelName}</span>.</p>
                   
                   <div className="bg-slate-50 rounded-xl p-6 mb-8 max-w-md mx-auto text-left border border-slate-200 shadow-sm">
                     <p className="text-sm text-slate-600 mb-4 font-medium">Please save these credentials to login to your admin panel:</p>

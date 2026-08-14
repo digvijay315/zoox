@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import api from "../../api";
-import { PlusCircle, Utensils, Trash2, Image, ToggleLeft, ToggleRight, Sparkles, Loader2, Search } from "lucide-react";
+import { PlusCircle, Utensils, Trash2, Image, ToggleLeft, ToggleRight, Sparkles, Loader2, Search, Edit } from "lucide-react";
 import { showError, showConfirm } from "../../utils/alerts";
 
 export default function AdminDishes() {
@@ -11,6 +11,7 @@ export default function AdminDishes() {
   const [price, setPrice] = useState("");
   const [category, setCategory] = useState("");
   const [image, setImage] = useState(""); // Stores Cloudinary URL after upload
+  const [editingDishId, setEditingDishId] = useState(null);
   
   // Custom states requested by user
   const [loading, setloading] = useState(""); // Tracks field being uploaded/loaded
@@ -106,7 +107,7 @@ export default function AdminDishes() {
     }
   };
 
-  const handleAddDish = async (e) => {
+  const handleSubmitDish = async (e) => {
     e.preventDefault();
     if (!image) {
       showError("Image Required", "Please upload a dish image first.");
@@ -123,40 +124,69 @@ export default function AdminDishes() {
     try {
       // Filter out any recipe items that have no item selected or quantity <= 0
       const validRecipe = recipe.filter(r => r.item && Number(r.quantity) > 0).map(r => ({
-        item: r.item,
+        item: typeof r.item === 'object' && r.item !== null ? (r.item._id || r.item) : r.item,
         quantity: Number(r.quantity),
         unit: r.unit
       }));
 
-      const res = await api.post("api/dishes", {
+      const payload = {
         name,
         price: Number(price),
         category,
         image,
         recipe: validRecipe,
-      });
+      };
+
+      let res;
+      if (editingDishId) {
+        res = await api.put(`api/dishes/${editingDishId}`, payload);
+      } else {
+        res = await api.post("api/dishes", payload);
+      }
 
       if (res.data.success) {
-        setMsg({ text: "Dish added successfully to menu!", type: "success" });
+        setMsg({ text: editingDishId ? "Dish updated successfully!" : "Dish added successfully to menu!", type: "success" });
         // Clear fields
-        setName("");
-        setPrice("");
-        setCategory("");
-        setImage("");
-        setRecipe([]);
+        handleCancelEdit();
         
         // Refresh list
         fetchDishes();
       }
     } catch (error) {
-      console.error("Failed to add dish:", error);
+      console.error("Failed to submit dish:", error);
       setMsg({
-        text: error.response?.data?.message || "Failed to add dish.",
+        text: error.response?.data?.message || "Failed to save dish.",
         type: "error",
       });
     } finally {
       setFormSubmitLoading(false);
     }
+  };
+
+  const handleEditDish = (dish) => {
+    setEditingDishId(dish._id);
+    setName(dish.name);
+    setPrice(dish.price);
+    setCategory(dish.category);
+    setImage(dish.image);
+    
+    const mappedRecipe = (dish.recipe || []).map(r => ({
+      item: typeof r.item === 'object' && r.item !== null ? r.item._id : r.item,
+      quantity: r.quantity,
+      unit: r.unit
+    }));
+    setRecipe(mappedRecipe);
+    setMsg({ text: "", type: "" });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingDishId(null);
+    setName("");
+    setPrice("");
+    setCategory("");
+    setImage("");
+    setRecipe([]);
+    setMsg({ text: "", type: "" });
   };
 
   const addRecipeRow = () => {
@@ -299,13 +329,22 @@ export default function AdminDishes() {
                         )}
                       </button>
 
-                      <button
-                        onClick={() => handleDeleteDish(dish._id)}
-                        className="p-1 text-slate-500 hover:text-red-400 rounded transition-all"
-                        title="Delete Item"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleEditDish(dish)}
+                          className="p-1 text-slate-500 hover:text-blue-400 rounded transition-all"
+                          title="Edit Item"
+                        >
+                          <Edit className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteDish(dish._id)}
+                          className="p-1 text-slate-500 hover:text-red-400 rounded transition-all"
+                          title="Delete Item"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -345,9 +384,16 @@ export default function AdminDishes() {
       {/* RIGHT: ADD DISH FORM */}
       <div className="w-full xl:w-80 shrink-0">
         <div className="glass-card p-6 rounded-2xl">
-          <div className="flex items-center gap-2 mb-5 border-b border-slate-800 pb-3">
-            <PlusCircle className="w-4 h-4 text-amber-500" />
-            <h2 className="font-bold text-sm text-slate-200">Add Menu Item</h2>
+          <div className="flex items-center justify-between mb-5 border-b border-slate-800 pb-3">
+            <div className="flex items-center gap-2">
+              <PlusCircle className="w-4 h-4 text-amber-500" />
+              <h2 className="font-bold text-sm text-slate-200">{editingDishId ? "Edit Menu Item" : "Add Menu Item"}</h2>
+            </div>
+            {editingDishId && (
+              <button onClick={handleCancelEdit} className="text-xs text-slate-400 hover:text-slate-200 transition-colors">
+                Cancel
+              </button>
+            )}
           </div>
 
           {msg.text && (
@@ -360,7 +406,7 @@ export default function AdminDishes() {
             </div>
           )}
 
-          <form onSubmit={handleAddDish} className="space-y-4">
+          <form onSubmit={handleSubmitDish} className="space-y-4">
             <div>
               <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
                 Dish/Item Name
@@ -514,7 +560,7 @@ export default function AdminDishes() {
               disabled={formSubmitLoading || !image}
               className="w-full py-3 bg-gradient-to-r from-amber-600 to-yellow-500 hover:from-amber-500 hover:to-yellow-400 text-slate-950 font-bold rounded-xl shadow-lg shadow-amber-600/15 active:scale-[0.98] transition-all flex items-center justify-center text-xs disabled:opacity-50"
             >
-              {formSubmitLoading ? "Saving..." : "Add to Catalog"}
+              {formSubmitLoading ? "Saving..." : (editingDishId ? "Update Dish" : "Add to Catalog")}
             </button>
           </form>
         </div>

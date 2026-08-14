@@ -302,7 +302,6 @@ export default function AdminDashboard() {
                   <th className="py-4 px-6">Date</th>
                   <th className="py-4 px-6">Customer Details</th>
                   <th className="py-4 px-6 text-right">Amount</th>
-                  <th className="py-4 px-6 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/50">
@@ -345,33 +344,11 @@ export default function AdminDashboard() {
                             )
                         }
                       </td>
-                      <td className="py-4 px-6 text-center">
-                        <div className="flex items-center justify-center gap-2">
-                          <button
-                            onClick={() => {
-                              if (inv.transactionType === 'restaurant') {
-                                setSelectedInvoice(inv);
-                              } else {
-                                if(inv.status === 'Checked-Out') setSelectedRoomInvoice(inv);
-                                else alert('Invoice only available after Check-Out');
-                              }
-                            }}
-                            className={`p-1.5 rounded-lg transition-all flex items-center justify-center border border-transparent ${
-                              inv.transactionType === 'restaurant' || inv.status === 'Checked-Out'
-                                ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
-                                : 'text-slate-700 cursor-not-allowed'
-                            }`}
-                            title="View Details"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="6" className="py-12 text-center text-slate-550">
+                    <td colSpan="5" className="py-12 text-center text-slate-550">
                       <div className="inline-flex items-center justify-center gap-2 mb-2">
                         <AlertCircle className="w-5 h-5 text-slate-650" />
                         <span className="font-semibold">No recent transactions found</span>

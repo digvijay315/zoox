@@ -39,12 +39,10 @@ export default function Login({ onLoginSuccess }) {
 
         {/* Branding Header */}
         <div className="text-center mb-8 flex flex-col items-center">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center shadow-xl shadow-blue-500/30 mb-4">
-            <Layers className="w-10 h-10 text-white" />
-          </div>
-          <h2 className="text-3xl font-black font-serif tracking-tight text-white mt-2">
+          <img src="/logo.png" alt="Zoox Logo" className="h-20 w-auto mb-2 object-contain" />
+          {/* <h2 className="text-3xl font-black font-serif tracking-tight text-white mt-2">
             Zoox
-          </h2>
+          </h2> */}
           <p className="text-xs text-amber-500 uppercase tracking-widest font-bold mt-1">
             Central Dashboard
           </p>

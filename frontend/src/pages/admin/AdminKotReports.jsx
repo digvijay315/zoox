@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import api from "../../api";
-import { UtensilsCrossed, Search, ChevronLeft, ChevronRight, AlertCircle, X, FileText } from "lucide-react";
+import { UtensilsCrossed, Search, ChevronLeft, ChevronRight, AlertCircle, X, FileText, Printer } from "lucide-react";
+import ThermalReceipt from "../../components/ThermalReceipt";
 
 export default function AdminKotReports() {
   const [orders, setOrders] = useState([]);
@@ -15,6 +16,7 @@ export default function AdminKotReports() {
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [showPrint, setShowPrint] = useState(false);
 
   useEffect(() => {
     fetchOrders();
@@ -241,8 +243,16 @@ export default function AdminKotReports() {
         )}
       </div>
 
+      {/* THERMAL RECEIPT */}
+      {showPrint && selectedOrder && (
+        <ThermalReceipt 
+          invoice={selectedOrder} 
+          onClose={() => setShowPrint(false)} 
+        />
+      )}
+
       {/* KOT DETAILS MODAL */}
-      {selectedOrder && (
+      {selectedOrder && !showPrint && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
             
@@ -259,12 +269,20 @@ export default function AdminKotReports() {
                   </p>
                 </div>
               </div>
-              <button 
-                onClick={() => setSelectedOrder(null)}
-                className="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-400 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-xl transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowPrint(true)}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 text-amber-600 dark:text-amber-500 hover:bg-amber-500/20 rounded-lg font-bold text-xs transition-colors"
+                >
+                  <Printer className="w-4 h-4" /> Print Bill
+                </button>
+                <button 
+                  onClick={() => setSelectedOrder(null)}
+                  className="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-400 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-xl transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
             </div>
 
             {/* Modal Body */}

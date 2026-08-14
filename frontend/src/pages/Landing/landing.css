@@ -1,0 +1,116 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Jost:wght@300;400;500;600;700&display=swap');
+
+.landing-scope {
+  --background: oklch(0.982 0.008 85);
+  --foreground: oklch(0.22 0.02 160);
+  --card: oklch(0.995 0.005 85);
+  --card-foreground: oklch(0.22 0.02 160);
+  --primary: oklch(0.28 0.045 158);
+  --primary-foreground: oklch(0.97 0.015 85);
+  --secondary: oklch(0.945 0.015 85);
+  --secondary-foreground: oklch(0.28 0.045 158);
+  --muted: oklch(0.945 0.012 85);
+  --muted-foreground: oklch(0.5 0.02 155);
+  --border: oklch(0.89 0.015 85);
+  --input: oklch(0.89 0.015 85);
+  --gold: oklch(0.74 0.105 83);
+  --gold-soft: oklch(0.88 0.055 88);
+  --ink: oklch(0.21 0.032 158);
+  --ink-foreground: oklch(0.96 0.012 85);
+  --font-display: "Cormorant Garamond", Georgia, serif;
+  --font-sans: "Jost", ui-sans-serif, system-ui, sans-serif;
+  --tracking-luxe: 0.28em;
+  --shadow-luxe: 0 30px 70px -35px oklch(0.21 0.032 158 / 0.45);
+  
+  background-color: var(--background) !important;
+  color: var(--foreground) !important;
+  font-family: var(--font-sans) !important;
+  font-feature-settings: "ss01";
+}
+
+.landing-scope .font-display,
+.landing-scope h1, .landing-scope h2, .landing-scope h3, .landing-scope h4 {
+  font-family: var(--font-display) !important;
+  font-weight: 300 !important;
+}
+
+.landing-scope .eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  font-weight: 400;
+  letter-spacing: var(--tracking-luxe);
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.landing-scope .surface-ink {
+  background-image: linear-gradient(180deg, oklch(0.21 0.032 158) 0%, oklch(0.17 0.028 160) 100%);
+  color: var(--ink-foreground);
+}
+
+.landing-scope .hero-overlay {
+  background-image: linear-gradient(180deg, oklch(0.15 0.03 160 / 0.55) 0%, oklch(0.15 0.03 160 / 0.35) 45%, oklch(0.15 0.03 160 / 0.85) 100%);
+}
+
+.landing-scope .shadow-luxe {
+  box-shadow: var(--shadow-luxe);
+}
+
+.landing-scope .rule-gold::after {
+  content: "";
+  display: block;
+  width: 3.5rem;
+  height: 1px;
+  margin-top: 1.25rem;
+  background: var(--gold);
+}
+
+.landing-scope .fade-up {
+  animation: fade-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Color mappings */
+.landing-scope .bg-background { background-color: var(--background) !important; }
+.landing-scope .bg-card { background-color: var(--card) !important; }
+.landing-scope .bg-primary { background-color: var(--primary) !important; }
+.landing-scope .bg-gold { background-color: var(--gold) !important; }
+.landing-scope .bg-secondary\/60 { background-color: oklch(0.945 0.015 85 / 0.6) !important; }
+
+.landing-scope .text-ink-foreground { color: var(--ink-foreground) !important; }
+.landing-scope .text-ink-foreground\/80 { color: oklch(0.96 0.012 85 / 0.8) !important; }
+.landing-scope .text-ink-foreground\/75 { color: oklch(0.96 0.012 85 / 0.75) !important; }
+.landing-scope .text-ink-foreground\/70 { color: oklch(0.96 0.012 85 / 0.7) !important; }
+.landing-scope .text-ink-foreground\/60 { color: oklch(0.96 0.012 85 / 0.6) !important; }
+.landing-scope .text-ink-foreground\/50 { color: oklch(0.96 0.012 85 / 0.5) !important; }
+.landing-scope .text-ink-foreground\/40 { color: oklch(0.96 0.012 85 / 0.4) !important; }
+
+.landing-scope .text-ink { color: var(--ink) !important; }
+.landing-scope .text-gold { color: var(--gold) !important; }
+.landing-scope .text-gold-soft\/80 { color: oklch(0.88 0.055 88 / 0.8) !important; }
+.landing-scope .text-muted-foreground { color: var(--muted-foreground) !important; }
+.landing-scope .text-primary { color: var(--primary) !important; }
+.landing-scope .text-primary-foreground { color: var(--primary-foreground) !important; }
+
+.landing-scope .border-border { border-color: var(--border) !important; }
+.landing-scope .border-border\/20 { border-color: oklch(0.89 0.015 85 / 0.2) !important; }
+.landing-scope .border-border\/15 { border-color: oklch(0.89 0.015 85 / 0.15) !important; }
+.landing-scope .border-border\/10 { border-color: oklch(0.89 0.015 85 / 0.1) !important; }
+.landing-scope .border-gold { border-color: var(--gold) !important; }
+.landing-scope .border-gold\/60 { border-color: oklch(0.74 0.105 83 / 0.6) !important; }
+.landing-scope .border-gold\/50 { border-color: oklch(0.74 0.105 83 / 0.5) !important; }
+.landing-scope .border-input { border-color: var(--input) !important; }
+.landing-scope .border-ink-foreground\/40 { border-color: oklch(0.96 0.012 85 / 0.4) !important; }
+
+.landing-scope .hover\:text-gold:hover { color: var(--gold) !important; }
+.landing-scope .hover\:bg-gold:hover { background-color: var(--gold) !important; }
+.landing-scope .hover\:text-ink:hover { color: var(--ink) !important; }
+.landing-scope .hover\:border-gold:hover { border-color: var(--gold) !important; }
+.landing-scope .hover\:text-primary:hover { color: var(--primary) !important; }
+.landing-scope .hover\:opacity-90:hover { opacity: 0.9 !important; }
+
+.landing-scope .focus\:border-gold:focus { border-color: var(--gold) !important; }

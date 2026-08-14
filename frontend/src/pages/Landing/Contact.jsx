@@ -1,125 +1,161 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Mail, Phone, MapPin, Send, MessageCircle, Clock } from 'lucide-react';
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { MapPin, Phone, Mail, Clock } from "lucide-react";
+import Swal from "sweetalert2";
 
-const Contact = () => {
+const details = [
+  {
+    icon: MapPin,
+    label: "Address",
+    value: "Plot No. 316, Rampur, Dumka Rampurhat Road, Dumka – 814119, Jharkhand",
+  },
+  { icon: Phone, label: "Phone", value: "+91 62993 82018", href: "tel:+916299382018" },
+  {
+    icon: Mail,
+    label: "Email",
+    value: "info@grandportico.in",
+    href: "mailto:info@grandportico.in",
+  },
+  { icon: Clock, label: "Front desk", value: "Open 24 hours, all days" },
+];
+
+function Field({
+  label,
+  name,
+  type = "text",
+  placeholder,
+}) {
   return (
-    <div className="bg-slate-50 relative overflow-hidden min-h-[calc(100vh-80px)]">
-      {/* Background Gradients */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-400/20 rounded-full blur-[100px] pointer-events-none mix-blend-multiply"></div>
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-fuchsia-400/20 rounded-full blur-[100px] pointer-events-none mix-blend-multiply"></div>
+    <div>
+      <label
+        htmlFor={name}
+        className="text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground"
+      >
+        {label}
+      </label>
+      <input
+        id={name}
+        name={name}
+        type={type}
+        required
+        placeholder={placeholder}
+        className="mt-2 w-full border border-input bg-background px-4 py-3 text-sm outline-none focus:border-gold"
+      />
+    </div>
+  );
+}
 
-      <section className="pt-32 pb-24 relative z-10">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-20 max-w-3xl mx-auto">
-            <motion.h1 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-5xl md:text-6xl font-black mb-6 text-slate-900 tracking-tight"
-            >
-              Get in touch
-            </motion.h1>
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="text-xl text-slate-600 font-medium"
-            >
-              Whether you need a demo, have a technical question, or just want to say hi—our team at Secure Billing Pro is ready to help you out.
-            </motion.p>
-          </div>
+function Contact() {
+  const [sent, setSent] = useState(false);
 
-          <div className="grid lg:grid-cols-5 gap-12 max-w-6xl mx-auto">
-            
-            {/* Contact Info (Left Column) */}
-            <motion.div 
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              className="lg:col-span-2 space-y-6"
-            >
-              <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-indigo-500/10 transition-shadow">
-                <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 border border-indigo-100 mb-6">
-                  <MessageCircle className="w-6 h-6" />
-                </div>
-                <h3 className="text-2xl font-bold text-slate-900 mb-2">Chat with Sales</h3>
-                <p className="text-slate-600 font-medium mb-4">Speak directly with our experts to find the right plan for your hotel.</p>
-                <a href="mailto:info.secureweb@gmail.com" className="text-lg font-bold text-indigo-600 hover:text-indigo-700">info.secureweb@gmail.com</a>
+  return (
+    <div className="min-h-screen bg-background">
+      <section className="surface-ink px-6 pb-20 pt-40 lg:px-10">
+        <div className="mx-auto max-w-7xl">
+          <p className="eyebrow">Contact</p>
+          <h1 className="rule-gold mt-5 max-w-2xl font-display text-5xl leading-tight lg:text-6xl">
+            We would love to host you
+          </h1>
+        </div>
+      </section>
+
+      <section className="mx-auto grid max-w-7xl gap-16 px-6 py-24 lg:grid-cols-[0.85fr_1.15fr] lg:px-10">
+        <div className="space-y-9">
+          {details.map((d) => (
+            <div key={d.label} className="flex gap-4">
+              <d.icon className="mt-1 shrink-0 text-gold" size={20} />
+              <div>
+                <p className="text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">
+                  {d.label}
+                </p>
+                {d.href ? (
+                  <a
+                    href={d.href}
+                    className="mt-1 block font-display text-2xl hover:text-primary"
+                  >
+                    {d.value}
+                  </a>
+                ) : (
+                  <p className="mt-1 text-[0.95rem] leading-relaxed">{d.value}</p>
+                )}
               </div>
+            </div>
+          ))}
+        </div>
 
-              <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-fuchsia-500/10 transition-shadow">
-                <div className="w-12 h-12 rounded-2xl bg-fuchsia-50 text-fuchsia-600 flex items-center justify-center shrink-0 border border-fuchsia-100 mb-6">
-                  <Phone className="w-6 h-6" />
-                </div>
-                <h3 className="text-2xl font-bold text-slate-900 mb-2">Call Support</h3>
-                <p className="text-slate-600 font-medium mb-4">Current customers can reach our technical support team 24/7.</p>
-                <a href="tel:+917004451454" className="text-lg font-bold text-fuchsia-600 hover:text-fuchsia-700">70044 51454</a>
-              </div>
-
-              <div className="bg-slate-900 p-8 rounded-3xl text-white shadow-xl">
-                <div className="flex items-center gap-4 mb-6">
-                  <Clock className="w-6 h-6 text-emerald-400" />
-                  <h3 className="text-xl font-bold">Operating Hours</h3>
-                </div>
-                <div className="space-y-2 text-slate-300 font-medium">
-                  <div className="flex justify-between">
-                    <span>Monday - Friday</span>
-                    <span className="text-white">9:00 AM - 8:00 PM</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Saturday - Sunday</span>
-                    <span className="text-white">10:00 AM - 4:00 PM</span>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Contact Form (Right Column) */}
-            <motion.div 
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-              className="lg:col-span-3 bg-white p-10 md:p-12 rounded-[2.5rem] border border-slate-200 shadow-2xl shadow-blue-900/5"
+        <div className="border border-border bg-card p-8 shadow-luxe lg:p-10">
+          <p className="eyebrow">Enquiry</p>
+          <h2 className="mt-3 font-display text-3xl">Send us your details</h2>
+          <form
+            className="mt-8 space-y-5"
+            onSubmit={(e) => {
+              e.preventDefault();
+              setSent(true);
+              Swal.fire({
+                icon: "success",
+                title: "Thank you",
+                text: "Our team will call you shortly.",
+              });
+            }}
+          >
+            <div className="grid gap-5 sm:grid-cols-2">
+              <Field label="Full name" name="name" placeholder="Your name" />
+              <Field label="Phone" name="phone" placeholder="+91" />
+            </div>
+            <Field
+              label="Email"
+              name="email"
+              type="email"
+              placeholder="you@example.com"
+            />
+            <div>
+              <label
+                htmlFor="purpose"
+                className="text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground"
+              >
+                Purpose
+              </label>
+              <select
+                id="purpose"
+                name="purpose"
+                className="mt-2 w-full border border-input bg-background px-4 py-3 text-sm outline-none focus:border-gold"
+              >
+                <option>Room reservation</option>
+                <option>Restaurant table</option>
+                <option>Banquet / event</option>
+                <option>Something else</option>
+              </select>
+            </div>
+            <div>
+              <label
+                htmlFor="message"
+                className="text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground"
+              >
+                Message
+              </label>
+              <textarea
+                id="message"
+                name="message"
+                rows={4}
+                placeholder="Dates, number of guests, anything else we should know."
+                className="mt-2 w-full border border-input bg-background px-4 py-3 text-sm outline-none focus:border-gold"
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full bg-primary px-8 py-3.5 text-[0.7rem] uppercase tracking-[0.22em] text-primary-foreground transition-opacity hover:opacity-90"
             >
-              <h2 className="text-3xl font-black text-slate-900 mb-8">Send a message</h2>
-              <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-2">First Name</label>
-                    <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all font-medium" placeholder="John" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-2">Last Name</label>
-                    <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all font-medium" placeholder="Doe" />
-                  </div>
-                </div>
-                
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-2">Email Address</label>
-                    <input type="email" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all font-medium" placeholder="john@example.com" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-2">Company / Hotel Name</label>
-                    <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all font-medium" placeholder="Grand Resort" />
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Message</label>
-                  <textarea rows="5" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all resize-none font-medium" placeholder="Tell us how we can help you..."></textarea>
-                </div>
-                
-                <button type="submit" className="w-full py-5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-xl shadow-blue-600/20 transform hover:scale-[1.02]">
-                  Send Message <Send className="w-5 h-5" />
-                </button>
-              </form>
-            </motion.div>
-          </div>
+              {sent ? "Enquiry sent" : "Submit enquiry"}
+            </button>
+            <p className="text-xs text-muted-foreground">
+              For immediate confirmation, please call the front desk at +91 62993
+              82018.
+            </p>
+          </form>
         </div>
       </section>
     </div>
   );
-};
+}
 
 export default Contact;
