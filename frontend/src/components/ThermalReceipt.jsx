@@ -55,7 +55,7 @@ export default function ThermalReceipt({ invoice, onClose, isKot = false }) {
   const netAmount = subTotal + cgst + sgst;
 
   const ReceiptContent = () => (
-    <div className="bg-white text-black font-mono mx-auto p-4" style={{ width: '80mm', minHeight: '100mm', fontSize: '12px', lineHeight: '1.2' }}>
+    <div className="bg-white text-black font-mono mx-auto px-2 pb-4" style={{ width: '80mm', minHeight: '100mm', fontSize: '12px', lineHeight: '1.2' }}>
       <div className="text-center mb-1">
         {!isKot && hLogo && <img src={hLogo} alt="Hotel Logo" className="w-16 h-16 object-contain mx-auto mb-2 grayscale" />}
         <h1 className="text-xl font-bold tracking-wide uppercase">{isKot ? "KITCHEN KOT" : hName}</h1>
@@ -167,7 +167,7 @@ export default function ThermalReceipt({ invoice, onClose, isKot = false }) {
   );
 
   return (
-    <div className="fixed inset-0 z-[99999] bg-white text-black flex justify-center items-start overflow-auto pb-10 print:static print:bg-white print:overflow-visible">
+    <div className="fixed inset-0 z-[99999] bg-white text-black flex justify-center items-start overflow-auto pb-10 print-receipt-wrapper">
       
       {/* Non-print UI buttons */}
       <div className="fixed top-4 right-4 no-print flex gap-2 z-[100000]">
@@ -192,24 +192,57 @@ export default function ThermalReceipt({ invoice, onClose, isKot = false }) {
       {/* Global styles for print format */}
       <style>{`
         @media print {
+          html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
+          }
+          @page {
+            margin: 0px !important;
+            padding: 0px !important;
+          }
+          
+          /* Reset everything that might trap fixed positioning */
+          * {
+            transform: none !important;
+            animation: none !important;
+            transition: none !important;
+            backdrop-filter: none !important;
+          }
+
+          /* Completely remove Navbar and Sidebar from layout flow */
+          nav, aside, .no-print {
+            display: none !important;
+          }
+
+          /* Hide other elements visually */
           body * {
             visibility: hidden;
           }
-          .no-print {
-            display: none !important;
+
+          /* Reset root containers so they don't add padding or heights */
+          #root, 
+          #root > div, 
+          #root > div > div {
+            position: static !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            height: auto !important;
+            min-height: 0 !important;
           }
-          .print\\:static, .print\\:static * {
+
+          /* Unhide the receipt and lock it to the absolute top of the page */
+          .print-receipt-wrapper, .print-receipt-wrapper * {
             visibility: visible;
           }
-          .print\\:static {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-          }
-          @page {
-            margin: 0;
-            size: 80mm auto;
+          .print-receipt-wrapper {
+            position: fixed !important;
+            left: 0 !important;
+            top: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            background: white !important;
           }
         }
       `}</style>
