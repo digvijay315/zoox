@@ -5,8 +5,43 @@ const Dish = require("../models/Dish");
 // @access  Private (both staff and admin)
 const getDishes = async (req, res) => {
   try {
-    const dishes = await Dish.find({}).populate("recipe.item", "name unit currentStock");
-    res.json({ success: true, dishes });
+    const { page, limit, search, category } = req.query;
+    
+    let query = {};
+    if (search) {
+      query.name = { $regex: search, $options: "i" };
+    }
+    if (category && category !== "All") {
+      query.category = category;
+    }
+
+    if (!page && !limit) {
+      // Backward compatibility: return all
+      const dishes = await Dish.find(query).populate("recipe.item", "name unit currentStock");
+      return res.json({ success: true, dishes });
+    }
+
+    const pageNumber = parseInt(page) || 1;
+    const pageSize = parseInt(limit) || 8;
+    const skip = (pageNumber - 1) * pageSize;
+
+    const dishes = await Dish.find(query)
+      .populate("recipe.item", "name unit currentStock")
+      .skip(skip)
+      .limit(pageSize);
+      
+    const totalDishes = await Dish.countDocuments(query);
+    const totalPages = Math.ceil(totalDishes / pageSize);
+
+    res.json({ 
+      success: true, 
+      dishes,
+      pagination: {
+        currentPage: pageNumber,
+        totalPages,
+        totalItems: totalDishes
+      }
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

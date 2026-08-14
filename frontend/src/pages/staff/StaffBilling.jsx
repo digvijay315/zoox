@@ -32,7 +32,7 @@ export default function StaffBilling() {
   const [selectedBookingId, setSelectedBookingId] = useState("");
 
   useEffect(() => {
-    fetchDishes();
+    fetchAllCategories();
     fetchActiveBookings();
   }, []);
 
@@ -47,38 +47,45 @@ export default function StaffBilling() {
     }
   };
 
-  const fetchDishes = async () => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  const [serverTotalPages, setServerTotalPages] = useState(1);
+
+  const fetchAllCategories = async () => {
     try {
       const res = await api.get("api/dishes");
       if (res.data.success) {
-        setDishes(res.data.dishes);
-        setFilteredDishes(res.data.dishes);
-        
-        // Compile categories
         const cats = ["All", ...new Set(res.data.dishes.map((d) => d.category))];
         setCategories(cats);
+      }
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
+
+  const fetchDishes = async () => {
+    try {
+      const categoryParam = selectedCategory === "All" ? "" : selectedCategory;
+      const res = await api.get(`api/dishes?page=${currentPage}&limit=${itemsPerPage}&search=${search}&category=${categoryParam}`);
+      if (res.data.success) {
+        const available = res.data.dishes.filter(d => d.available);
+        setFilteredDishes(available);
+        if (res.data.pagination) {
+          setServerTotalPages(res.data.pagination.totalPages || 1);
+        }
       }
     } catch (error) {
       console.error("Error fetching dishes:", error);
     }
   };
 
-  // Filter dishes on search or category select
   useEffect(() => {
-    let result = dishes.filter((dish) => dish.available);
+    fetchDishes();
+  }, [search, selectedCategory, currentPage]);
 
-    if (selectedCategory !== "All") {
-      result = result.filter((d) => d.category === selectedCategory);
-    }
-
-    if (search) {
-      result = result.filter((d) =>
-        d.name.toLowerCase().includes(search.toLowerCase())
-      );
-    }
-
-    setFilteredDishes(result);
-  }, [search, selectedCategory, dishes]);
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, selectedCategory]);
 
   // Cart helper functions
   const addToCart = (dish) => {
@@ -217,19 +224,19 @@ export default function StaffBilling() {
       <div className="flex-1 flex flex-col gap-6 no-print">
         
         {/* Search and Categories Bar */}
-        <div className="glass-card p-4 rounded-2xl flex flex-col sm:flex-row items-center gap-4 justify-between">
-          <div className="relative w-full sm:max-w-xs">
+        <div className="flex flex-col gap-3">
+          <div className="relative w-full">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
             <input
               type="text"
               placeholder="Search dishes..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-white dark:bg-slate-900/60 border border-slate-300 dark:border-slate-800 text-slate-800 dark:text-slate-100 rounded-xl py-2.5 pl-10 pr-4 text-xs outline-none focus:border-amber-500/60"
+              className="w-full bg-slate-900/60 border border-slate-800 text-slate-100 rounded-xl py-2 pl-10 pr-4 text-sm outline-none focus:border-amber-500"
             />
           </div>
 
-          <div className="flex gap-2 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0 scroll-smooth">
+          <div className="flex flex-wrap gap-2 pb-1">
             {categories.map((cat) => (
               <button
                 key={cat}
@@ -247,46 +254,70 @@ export default function StaffBilling() {
         </div>
 
         {/* Dish Items Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 flex-1 content-start">
-          {filteredDishes.length > 0 ? (
-            filteredDishes.map((dish) => (
-              <div
-                key={dish._id}
-                onClick={() => addToCart(dish)}
-                className="glass-card rounded-2xl overflow-hidden hover:border-amber-500/30 transition-all duration-350 cursor-pointer flex flex-col group active:scale-[0.98] select-none"
-              >
-                <div className="h-32 w-full bg-slate-850 relative overflow-hidden">
-                  <img
-                    src={dish.image}
-                    alt={dish.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    onError={handleImageError}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-60"></div>
-                  <span className="absolute bottom-2.5 right-2.5 bg-slate-950/80 text-amber-500 border border-amber-500/30 font-bold px-2 py-0.5 rounded-lg text-xs font-mono">
-                    ₹{dish.price}
-                  </span>
-                </div>
-                <div className="p-2.5 flex flex-col gap-1.5 flex-1">
-                  <div>
-                    <h3 className="font-bold text-xs sm:text-sm text-slate-100 group-hover:text-amber-400 transition-colors leading-tight line-clamp-1">
-                      {dish.name}
-                    </h3>
-                    <p className="text-[9px] text-slate-500 font-medium uppercase tracking-wider">
-                      {dish.category}
-                    </p>
+        <div className="flex flex-col gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 content-start">
+            {filteredDishes.length > 0 ? (
+              filteredDishes.map((dish) => (
+                <div
+                  key={dish._id}
+                  onClick={() => addToCart(dish)}
+                  className="glass-card rounded-2xl overflow-hidden hover:border-amber-500/30 transition-all duration-350 cursor-pointer flex flex-col group active:scale-[0.98] select-none"
+                >
+                  <div className="h-32 w-full bg-slate-850 relative overflow-hidden">
+                    <img
+                      src={dish.image}
+                      alt={dish.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&q=60"; }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-60"></div>
+                    <span className="absolute bottom-2.5 right-2.5 bg-slate-950/80 text-amber-500 border border-amber-500/30 font-bold px-2 py-0.5 rounded-lg text-xs font-mono">
+                      ₹{dish.price}
+                    </span>
                   </div>
-                  <button className="w-full mt-auto py-1.5 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-amber-500/20 group-hover:bg-amber-500/10 group-hover:text-amber-500 rounded-lg text-[10px] font-bold uppercase tracking-wider flex items-center justify-center gap-1 transition-all">
-                    <span>Add to Cart</span>
-                    <ArrowUpRight className="w-3 h-3" />
-                  </button>
+                  <div className="p-2.5 flex flex-col gap-1.5 flex-1">
+                    <div>
+                      <h3 className="font-bold text-sm text-slate-100 leading-snug break-words">
+                        {dish.name}
+                      </h3>
+                      <p className="text-[9px] text-slate-500 font-medium uppercase tracking-wider mt-1">
+                        {dish.category}
+                      </p>
+                    </div>
+                    <button className="w-full mt-auto py-1.5 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-amber-500/20 group-hover:bg-amber-500/10 group-hover:text-amber-500 rounded-lg text-[10px] font-bold uppercase tracking-wider flex items-center justify-center gap-1 transition-all">
+                      <span>Add to Cart</span>
+                      <ArrowUpRight className="w-3 h-3" />
+                    </button>
+                  </div>
                 </div>
+              ))
+            ) : (
+              <div className="col-span-full py-12 flex flex-col items-center justify-center text-slate-500 gap-2">
+                <ShoppingBag className="w-12 h-12 stroke-[1.5] text-slate-600" />
+                <p className="text-sm">No dishes found matching selection.</p>
               </div>
-            ))
-          ) : (
-            <div className="col-span-full py-12 flex flex-col items-center justify-center text-slate-500 gap-2">
-              <ShoppingBag className="w-12 h-12 stroke-[1.5] text-slate-600" />
-              <p className="text-sm">No dishes found matching selection.</p>
+            )}
+          </div>
+          
+          {serverTotalPages > 1 && (
+            <div className="flex justify-center items-center gap-4 pt-2 border-t border-slate-800 mt-2 mb-2 no-print">
+              <button 
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-4 py-1.5 bg-slate-800 text-slate-300 rounded-lg disabled:opacity-50 hover:bg-slate-700 transition-colors text-sm font-semibold"
+              >
+                Prev
+              </button>
+              <span className="text-slate-400 text-sm font-semibold">
+                Page {currentPage} of {serverTotalPages}
+              </span>
+              <button 
+                onClick={() => setCurrentPage(p => Math.min(serverTotalPages, p + 1))}
+                disabled={currentPage === serverTotalPages}
+                className="px-4 py-1.5 bg-slate-800 text-slate-300 rounded-lg disabled:opacity-50 hover:bg-slate-700 transition-colors text-sm font-semibold"
+              >
+                Next
+              </button>
             </div>
           )}
         </div>

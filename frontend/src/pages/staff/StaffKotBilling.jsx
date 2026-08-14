@@ -23,6 +23,11 @@ export default function StaffKotBilling() {
   const [categories, setCategories] = useState(["All"]);
   const [selectedCategory, setSelectedCategory] = useState("All");
 
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  
+
   // Order Data
   const [cart, setCart] = useState([]);
   const [initialCart, setInitialCart] = useState([]);
@@ -38,14 +43,14 @@ export default function StaffKotBilling() {
   useEffect(() => {
     fetchTables();
     fetchVirtualOrders();
-    fetchDishes();
+    fetchAllCategories();
   }, []);
 
   const fetchVirtualOrders = async () => {
     try {
       const res = await api.get("api/orders/virtual/active");
       if (res.data.success) {
-        setVirtualOrders(res.data.data);
+        setVirtualOrders(res.data.data || []);
       }
     } catch (error) {
       console.error(error);
@@ -55,18 +60,18 @@ export default function StaffKotBilling() {
   const fetchTables = async () => {
     try {
       const res = await tableAPI.getTables();
-      setTables(res.data.data);
+      setTables(res.data.data || []);
     } catch (error) {
       console.error(error);
     }
   };
 
-  const fetchDishes = async () => {
+  const [serverTotalPages, setServerTotalPages] = useState(1);
+
+  const fetchAllCategories = async () => {
     try {
       const res = await api.get("api/dishes");
       if (res.data.success) {
-        setDishes(res.data.dishes);
-        setFilteredDishes(res.data.dishes);
         const cats = ["All", ...new Set(res.data.dishes.map((d) => d.category))];
         setCategories(cats);
       }
@@ -75,16 +80,30 @@ export default function StaffKotBilling() {
     }
   };
 
+  const fetchDishes = async () => {
+    try {
+      const categoryParam = selectedCategory === "All" ? "" : selectedCategory;
+      const res = await api.get(`api/dishes?page=${currentPage}&limit=${itemsPerPage}&search=${search}&category=${categoryParam}`);
+      if (res.data.success) {
+        // filter out unavailable dishes just in case, though ideally backend does this
+        const available = res.data.dishes.filter(d => d.available);
+        setFilteredDishes(available);
+        if (res.data.pagination) {
+          setServerTotalPages(res.data.pagination.totalPages || 1);
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
-    let result = dishes.filter((dish) => dish.available);
-    if (selectedCategory !== "All") {
-      result = result.filter((d) => d.category === selectedCategory);
-    }
-    if (search) {
-      result = result.filter((d) => d.name.toLowerCase().includes(search.toLowerCase()));
-    }
-    setFilteredDishes(result);
-  }, [search, selectedCategory, dishes]);
+    fetchDishes();
+  }, [search, selectedCategory, currentPage]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, selectedCategory]);
 
   const handleVirtualOrderClick = async (order) => {
     setSelectedTable({
@@ -284,6 +303,10 @@ export default function StaffKotBilling() {
     goBackToTables();
   };
 
+  // Server-side pagination
+  const currentDishes = filteredDishes;
+  const totalPages = serverTotalPages;
+
   if (view === "tables") {
     return (
       <div className="p-4 md:p-6 max-w-7xl mx-auto min-h-[calc(100vh-80px)]">
@@ -325,7 +348,7 @@ export default function StaffKotBilling() {
 
         <h2 className="text-xl font-bold text-slate-300 mb-4">Dine-in Tables</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {tables.map(table => (
+          {(tables || []).map(table => (
             <div 
               key={table._id}
               onClick={() => handleTableClick(table)}
@@ -367,8 +390,38 @@ export default function StaffKotBilling() {
     <div className="flex flex-col lg:flex-row gap-6 p-4 md:p-6 min-h-[calc(100vh-80px)]">
       {/* LEFT: MENU ITEMS */}
       <div className="flex-1 flex flex-col gap-4 no-print">
-        <div className="flex items-center gap-4 border-b border-slate-800 pb-4">
-          <button onClick={goBackToTables} className="p-2 bg-slate-800 rounded-lg text-slate-300 hover:text-white">
+        {/* Search & Categories (Moved to Top) */}
+        <div className="flex flex-col gap-3">
+          <div className="relative w-full">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+            <input
+              type="text"
+              placeholder="Search dishes..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full bg-slate-900/60 border border-slate-800 text-slate-100 rounded-xl py-2 pl-10 pr-4 text-sm outline-none focus:border-amber-500"
+            />
+          </div>
+          <div className="flex flex-wrap gap-2 pb-1">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={`px-4 py-2 text-xs font-semibold rounded-xl whitespace-nowrap transition-all ${
+                  selectedCategory === cat
+                    ? "bg-gradient-to-r from-amber-600 to-yellow-500 text-slate-950 shadow-md shadow-amber-600/10"
+                    : "bg-slate-200/80 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-800"
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Table Info & Back Button */}
+        <div className="flex items-center gap-4 border-b border-slate-800 pb-2">
+          <button onClick={goBackToTables} className="p-2 bg-slate-800 rounded-lg text-slate-300 hover:text-white transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </button>
           <h2 className="text-xl font-bold text-slate-200">
@@ -379,52 +432,72 @@ export default function StaffKotBilling() {
           </span>
         </div>
 
-        {/* Search & Categories */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="relative w-full sm:max-w-xs">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-            <input
-              type="text"
-              placeholder="Search dishes..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-slate-900/60 border border-slate-800 text-slate-100 rounded-xl py-2 pl-10 pr-4 text-xs outline-none"
-            />
-          </div>
-          <div className="flex gap-2 overflow-x-auto pb-1 scroll-smooth">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-3 py-1.5 text-xs font-semibold rounded-lg whitespace-nowrap transition-all ${
-                  selectedCategory === cat ? "bg-amber-600 text-white" : "bg-slate-800 text-slate-400"
-                }`}
+        {/* Dish Grid & Pagination */}
+        <div className="flex flex-col gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 content-start">
+            {currentDishes.map((dish) => (
+              <div
+                key={dish._id}
+                onClick={() => addToCart(dish)}
+                className="glass-card rounded-2xl overflow-hidden hover:border-amber-500/30 transition-all duration-350 cursor-pointer flex flex-col group active:scale-[0.98] select-none"
               >
-                {cat}
-              </button>
+                <div className="h-32 w-full bg-slate-850 relative overflow-hidden shrink-0">
+                  <img
+                    src={dish.image}
+                    alt={dish.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&q=60"; }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-60"></div>
+                  <span className="absolute bottom-2.5 right-2.5 bg-slate-950/80 text-amber-500 border border-amber-500/30 font-bold px-2 py-0.5 rounded-lg text-xs font-mono">
+                    ₹{dish.price}
+                  </span>
+                </div>
+                <div className="p-2.5 flex flex-col gap-1.5 flex-1">
+                  <div>
+                    <h3 className="font-bold text-sm text-slate-100 leading-snug break-words">
+                      {dish.name}
+                    </h3>
+                    <p className="text-[9px] text-slate-500 font-medium uppercase tracking-wider mt-1">
+                      {dish.category}
+                    </p>
+                  </div>
+                  <button className="w-full mt-auto py-1.5 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-amber-500/20 group-hover:bg-amber-500/10 group-hover:text-amber-500 rounded-lg text-[10px] font-bold uppercase tracking-wider flex items-center justify-center gap-1 transition-all">
+                    <span>Add to Cart</span>
+                    <ArrowUpRight className="w-3 h-3" />
+                  </button>
+                </div>
+              </div>
             ))}
           </div>
-        </div>
-
-        {/* Dish Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 overflow-y-auto pr-2 content-start" style={{ maxHeight: 'calc(100vh - 220px)' }}>
-          {filteredDishes.map((dish) => (
-            <div key={dish._id} onClick={() => addToCart(dish)} className="glass-card rounded-xl overflow-hidden cursor-pointer hover:border-amber-500/40 active:scale-95 transition-all">
-              <div className="h-24 w-full relative">
-                <img src={dish.image} alt={dish.name} className="w-full h-full object-cover" onError={(e)=>{e.target.src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&q=60"}} />
-                <span className="absolute bottom-1 right-1 bg-slate-900/90 text-amber-400 px-1.5 py-0.5 rounded text-xs font-bold">₹{dish.price}</span>
-              </div>
-              <div className="p-1.5 px-2">
-                <h3 className="font-bold text-xs text-slate-200 truncate leading-tight">{dish.name}</h3>
-              </div>
+          
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center gap-4 pt-2 border-t border-slate-800 no-print pb-2">
+              <button 
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-4 py-1.5 bg-slate-800 text-slate-300 rounded-lg disabled:opacity-50 hover:bg-slate-700 transition-colors text-sm font-semibold"
+              >
+                Prev
+              </button>
+              <span className="text-slate-400 text-sm font-semibold">
+                Page {currentPage} of {totalPages}
+              </span>
+              <button 
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="px-4 py-1.5 bg-slate-800 text-slate-300 rounded-lg disabled:opacity-50 hover:bg-slate-700 transition-colors text-sm font-semibold"
+              >
+                Next
+              </button>
             </div>
-          ))}
+          )}
         </div>
       </div>
 
       {/* RIGHT: CART / KOT */}
       <div className="w-full lg:w-96 flex flex-col gap-4 no-print shrink-0">
-        <div className="glass-card rounded-2xl flex flex-col flex-1 h-[calc(100vh-140px)]">
+        <div className="glass-card rounded-2xl flex flex-col flex-1 min-h-[400px]">
           <div className="p-4 border-b border-slate-800 bg-slate-900/40 flex justify-between items-center rounded-t-2xl">
             <h3 className="font-bold text-slate-200">Current KOT</h3>
             <span className="bg-amber-500/20 text-amber-400 px-2 py-1 rounded text-xs font-bold">{cart.length} Items</span>

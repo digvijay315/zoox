@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import api from "../../api";
-import { PlusCircle, Utensils, Trash2, Image, ToggleLeft, ToggleRight, Sparkles, Loader2 } from "lucide-react";
+import { PlusCircle, Utensils, Trash2, Image, ToggleLeft, ToggleRight, Sparkles, Loader2, Search } from "lucide-react";
 import { showError, showConfirm } from "../../utils/alerts";
 
 export default function AdminDishes() {
@@ -22,11 +22,24 @@ export default function AdminDishes() {
   const [inventoryItems, setInventoryItems] = useState([]);
   const [recipe, setRecipe] = useState([]); // Array of { item: "", quantity: "", unit: "kg" }
 
+  // Pagination & Search
+  const [currentPage, setCurrentPage] = useState(1);
+  const [serverTotalPages, setServerTotalPages] = useState(1);
+  const itemsPerPage = 10;
+  const [search, setSearch] = useState("");
+
   useEffect(() => {
-    fetchDishes();
     fetchCategories();
     fetchInventoryItems();
   }, []);
+
+  useEffect(() => {
+    fetchDishes();
+  }, [currentPage, search]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
 
   const fetchInventoryItems = async () => {
     try {
@@ -52,9 +65,12 @@ export default function AdminDishes() {
 
   const fetchDishes = async () => {
     try {
-      const res = await api.get("api/dishes");
+      const res = await api.get(`api/dishes?page=${currentPage}&limit=${itemsPerPage}&search=${search}`);
       if (res.data.success) {
         setDishes(res.data.dishes);
+        if (res.data.pagination) {
+          setServerTotalPages(res.data.pagination.totalPages || 1);
+        }
       }
     } catch (error) {
       console.error("Error fetching dishes:", error);
@@ -222,6 +238,18 @@ export default function AdminDishes() {
         {/* LEFT: DISHES LIST */}
         <div className="flex-1 flex flex-col gap-6 min-w-0">
         <div className="glass-card rounded-2xl p-6 flex flex-col gap-4">
+          
+          {/* SEARCH BAR */}
+          <div className="relative w-full mb-2">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+            <input
+              type="text"
+              placeholder="Search dishes by name..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full bg-slate-900/60 border border-slate-800 text-slate-100 rounded-xl py-2 pl-10 pr-4 text-sm outline-none focus:border-amber-500"
+            />
+          </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {dishes.length > 0 ? (
@@ -289,6 +317,28 @@ export default function AdminDishes() {
               </div>
             )}
           </div>
+
+          {serverTotalPages > 1 && (
+            <div className="flex justify-center items-center gap-4 pt-4 border-t border-slate-800/60 mt-2">
+              <button 
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-4 py-1.5 bg-slate-800 text-slate-300 rounded-lg disabled:opacity-50 hover:bg-slate-700 transition-colors text-xs font-semibold"
+              >
+                Prev
+              </button>
+              <span className="text-slate-400 text-xs font-semibold">
+                Page {currentPage} of {serverTotalPages}
+              </span>
+              <button 
+                onClick={() => setCurrentPage(p => Math.min(serverTotalPages, p + 1))}
+                disabled={currentPage === serverTotalPages}
+                className="px-4 py-1.5 bg-slate-800 text-slate-300 rounded-lg disabled:opacity-50 hover:bg-slate-700 transition-colors text-xs font-semibold"
+              >
+                Next
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
