@@ -350,6 +350,12 @@ export default function AdminKotReports() {
                     <span>Subtotal</span>
                     <span className="font-mono text-slate-700 dark:text-slate-300">₹{selectedOrder.subTotal.toFixed(2)}</span>
                   </div>
+                  {selectedOrder.discountAmount > 0 && (
+                    <div className="flex justify-between text-xs text-amber-500 dark:text-amber-500">
+                      <span>Discount ({selectedOrder.discountPercentage}%)</span>
+                      <span className="font-mono">-₹{selectedOrder.discountAmount.toFixed(2)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400">
                     <span>Tax (5%)</span>
                     <span className="font-mono text-slate-700 dark:text-slate-300">₹{selectedOrder.tax.toFixed(2)}</span>

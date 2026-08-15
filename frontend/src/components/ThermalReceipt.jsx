@@ -47,7 +47,7 @@ export default function ThermalReceipt({ invoice, onClose, isKot = false }) {
     sgst = invoice.tax / 2;
   }
 
-  const netAmount = subTotal + cgst + sgst;
+  const netAmount = subTotal - (invoice.discountAmount || 0) + cgst + sgst;
 
   const ReceiptContent = () => (
     <div className="bg-white text-black font-mono mx-auto px-2 pb-4" style={{ width: '80mm', minHeight: '100mm', fontSize: '12px', lineHeight: '1.2' }}>
@@ -114,6 +114,12 @@ export default function ThermalReceipt({ invoice, onClose, isKot = false }) {
               <div className="w-[60%] text-right pr-4">Total:</div>
               <div className="w-[40%] text-right">{subTotal.toFixed(2)}</div>
             </div>
+            {invoice.discountAmount > 0 && (
+              <div className="flex justify-end w-full font-semibold">
+                <div className="w-[60%] text-right pr-4">Discount ({invoice.discountPercentage}%):</div>
+                <div className="w-[40%] text-right">-{invoice.discountAmount.toFixed(2)}</div>
+              </div>
+            )}
             {invoice.tax > 0 && (
               <>
                 <div className="flex justify-end w-full">

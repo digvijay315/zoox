@@ -53,7 +53,7 @@ const getDateRange = (filterType, specificDate) => {
 // @route   POST /api/invoices
 // @access  Private
 const createInvoice = async (req, res) => {
-  const { customerName, customerMobile, customerEmail, items, roomBookingId } = req.body;
+  const { customerName, customerMobile, customerEmail, items, roomBookingId, discountPercentage = 0 } = req.body;
 
   try {
     if (!customerName || !customerMobile || !items || items.length === 0) {
@@ -74,8 +74,9 @@ const createInvoice = async (req, res) => {
       };
     });
 
-    const tax = Math.round((subTotal * 0.05) * 100) / 100; // 5% GST
-    const grandTotal = Math.round((subTotal + tax) * 100) / 100;
+    const discountAmount = Math.round((subTotal * discountPercentage / 100) * 100) / 100;
+    const tax = Math.round(((subTotal - discountAmount) * 0.05) * 100) / 100; // 5% GST
+    const grandTotal = Math.round((subTotal - discountAmount + tax) * 100) / 100;
 
     let invoiceStatus = 'Paid';
     if (roomBookingId) {
@@ -88,6 +89,8 @@ const createInvoice = async (req, res) => {
       customerEmail,
       items: formattedItems,
       subTotal,
+      discountPercentage,
+      discountAmount,
       tax,
       grandTotal,
       status: invoiceStatus,

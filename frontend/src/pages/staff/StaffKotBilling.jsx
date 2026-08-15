@@ -14,7 +14,8 @@ export default function StaffKotBilling() {
     customerName: "",
     customerMobile: "",
     customerEmail: "",
-    paymentMode: "Cash"
+    paymentMode: "Cash",
+    discountPercentage: 0
   });
   // Menu Data
   const [dishes, setDishes] = useState([]);
@@ -187,8 +188,9 @@ export default function StaffKotBilling() {
   };
 
   const subTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const tax = applyGST ? Math.round((subTotal * 0.05) * 100) / 100 : 0; // 5% GST
-  const grandTotal = Math.round((subTotal + tax) * 100) / 100;
+  const discountAmount = Math.round((subTotal * (checkoutData.discountPercentage || 0) / 100) * 100) / 100;
+  const tax = applyGST ? Math.round(((subTotal - discountAmount) * 0.05) * 100) / 100 : 0; // 5% GST
+  const grandTotal = Math.round((subTotal - discountAmount + tax) * 100) / 100;
 
   const handleSaveOrder = async () => {
     if (cart.length === 0) {
@@ -283,7 +285,7 @@ export default function StaffKotBilling() {
         setIsKotPrint(false);
         setGeneratedInvoice(res.data.data);
         setShowCheckoutModal(false);
-        setCheckoutData({ customerName: "", customerMobile: "", customerEmail: "", paymentMode: "Cash" });
+        setCheckoutData({ customerName: "", customerMobile: "", customerEmail: "", paymentMode: "Cash", discountPercentage: 0 });
       }
     } catch (error) {
       showError("Checkout Failed", error.response?.data?.message || "Failed to generate bill.");
@@ -534,6 +536,7 @@ export default function StaffKotBilling() {
               </label>
             </div>
             <div className="flex justify-between text-xs py-1 text-slate-400"><span>Subtotal</span><span>₹{subTotal.toFixed(2)}</span></div>
+            {discountAmount > 0 && <div className="flex justify-between text-xs py-1 text-amber-500"><span>Discount ({checkoutData.discountPercentage}%)</span><span>-₹{discountAmount.toFixed(2)}</span></div>}
             {applyGST && <div className="flex justify-between text-xs py-1 text-slate-400"><span>GST (5%)</span><span>₹{tax.toFixed(2)}</span></div>}
             <div className="flex justify-between font-bold text-slate-100 py-1.5 border-t border-slate-700 mt-1"><span>Grand Total</span><span className="text-amber-400">₹{grandTotal.toFixed(2)}</span></div>
             
@@ -596,6 +599,18 @@ export default function StaffKotBilling() {
                   <option value="Credit Bill">Credit Bill</option>
                   <option value="NC Bill">NC Bill (Non-Chargeable)</option>
                 </select>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 mb-1">Discount (%)</label>
+                <input 
+                  type="number" 
+                  min="0"
+                  max="100"
+                  value={checkoutData.discountPercentage}
+                  onChange={e => setCheckoutData({...checkoutData, discountPercentage: Number(e.target.value) || 0})}
+                  className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 outline-none focus:border-amber-500"
+                  placeholder="0"
+                />
               </div>
               <div>
                 <label className="block text-xs font-semibold text-slate-400 mb-1">Customer Name {['NC Bill', 'Credit Bill'].includes(checkoutData.paymentMode) ? '*' : ''}</label>

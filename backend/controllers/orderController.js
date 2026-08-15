@@ -131,7 +131,7 @@ exports.getActiveVirtualOrders = async (req, res) => {
 // @access  Private
 exports.checkoutOrder = async (req, res) => {
   try {
-    const { customerName, customerMobile, customerEmail, paymentMode } = req.body;
+    const { customerName, customerMobile, customerEmail, paymentMode, discountPercentage = 0 } = req.body;
     
     const order = await Order.findOne({ _id: req.params.orderId }).populate("table");
     if (!order) {
@@ -149,6 +149,11 @@ exports.checkoutOrder = async (req, res) => {
       cName = order.orderDisplayId;
     }
 
+    // Calculate new totals with discount
+    const discountAmount = Math.round((order.subTotal * discountPercentage / 100) * 100) / 100;
+    const newTax = Math.round(((order.subTotal - discountAmount) * 0.05) * 100) / 100;
+    const newGrandTotal = Math.round((order.subTotal - discountAmount + newTax) * 100) / 100;
+
     // Create Invoice
     const invoice = await Invoice.create({
       customerName: cName,
@@ -157,8 +162,10 @@ exports.checkoutOrder = async (req, res) => {
       paymentMode: paymentMode || "Cash",
       items: order.items,
       subTotal: order.subTotal,
-      tax: order.tax,
-      grandTotal: order.grandTotal,
+      discountPercentage,
+      discountAmount,
+      tax: newTax,
+      grandTotal: newGrandTotal,
       createdBy: req.user._id,
       tableId: order.table ? order.table._id : null,
       orderId: order._id,
@@ -169,6 +176,10 @@ exports.checkoutOrder = async (req, res) => {
     order.status = "Billed";
     order.paymentMode = paymentMode || "Cash";
     order.customerName = cName;
+    order.discountPercentage = discountPercentage;
+    order.discountAmount = discountAmount;
+    order.tax = newTax;
+    order.grandTotal = newGrandTotal;
     if (customerMobile) {
       order.customerMobile = customerMobile;
     }

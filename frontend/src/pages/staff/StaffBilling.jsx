@@ -25,6 +25,7 @@ export default function StaffBilling() {
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState(["All"]);
   const [applyGST, setApplyGST] = useState(true);
+  const [discountPercentage, setDiscountPercentage] = useState(0);
 
   // Room Billing feature
   const [billType, setBillType] = useState("Walk-in"); // "Walk-in" or "Room"
@@ -130,8 +131,9 @@ export default function StaffBilling() {
   };
 
   const subTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const tax = applyGST ? Math.round((subTotal * 0.05) * 100) / 100 : 0; // 5% GST
-  const grandTotal = Math.round((subTotal + tax) * 100) / 100;
+  const discountAmount = Math.round((subTotal * discountPercentage / 100) * 100) / 100;
+  const tax = applyGST ? Math.round(((subTotal - discountAmount) * 0.05) * 100) / 100 : 0; // 5% GST
+  const grandTotal = Math.round((subTotal - discountAmount + tax) * 100) / 100;
   const returnAmount = receivedAmount ? Number(receivedAmount) - grandTotal : 0;
 
   const handleCheckout = async (e) => {
@@ -163,6 +165,7 @@ export default function StaffBilling() {
         customerMobile,
         customerEmail,
         paymentMode,
+        discountPercentage: Number(discountPercentage) || 0,
         items: cart,
       };
       
@@ -188,6 +191,7 @@ export default function StaffBilling() {
         setCustomerEmail("");
         setReceivedAmount("");
         setSelectedBookingId("");
+        setDiscountPercentage(0);
       }
     } catch (error) {
       console.error("Checkout failed:", error);
@@ -397,6 +401,12 @@ export default function StaffBilling() {
               <span>Subtotal</span>
               <span className="font-mono text-slate-200">₹{subTotal.toFixed(2)}</span>
             </div>
+            {discountAmount > 0 && (
+              <div className="flex justify-between text-xs py-1.5 text-amber-500">
+                <span>Discount ({discountPercentage}%)</span>
+                <span className="font-mono">-₹{discountAmount.toFixed(2)}</span>
+              </div>
+            )}
             {applyGST && (
               <div className="flex justify-between text-xs py-1.5 text-slate-400">
                 <span>GST (5%)</span>
@@ -470,6 +480,21 @@ export default function StaffBilling() {
                 <option value="Credit Bill">Credit Bill</option>
                 <option value="NC Bill">NC Bill (Non-Chargeable)</option>
               </select>
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                Discount (%)
+              </label>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                value={discountPercentage}
+                onChange={(e) => setDiscountPercentage(e.target.value)}
+                placeholder="0"
+                className="w-full bg-slate-900/60 border border-slate-800 text-slate-100 rounded-xl px-3 py-2 text-xs outline-none focus:border-amber-500/60"
+              />
             </div>
 
             <div>

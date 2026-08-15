@@ -48,6 +48,14 @@ const orderSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    discountPercentage: {
+      type: Number,
+      default: 0,
+    },
+    discountAmount: {
+      type: Number,
+      default: 0,
+    },
     tax: {
       type: Number,
       default: 0,
