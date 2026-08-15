@@ -17,6 +17,7 @@ export default function AdminKotReports() {
   const [toDate, setToDate] = useState("");
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showPrint, setShowPrint] = useState(false);
+  const [printIsKot, setPrintIsKot] = useState(false);
 
   useEffect(() => {
     fetchOrders();
@@ -247,6 +248,7 @@ export default function AdminKotReports() {
       {showPrint && selectedOrder && (
         <ThermalReceipt 
           invoice={selectedOrder} 
+          isKot={printIsKot}
           onClose={() => setShowPrint(false)} 
         />
       )}
@@ -271,7 +273,13 @@ export default function AdminKotReports() {
               </div>
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setShowPrint(true)}
+                  onClick={() => { setPrintIsKot(true); setShowPrint(true); }}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-500 hover:bg-emerald-500/20 rounded-lg font-bold text-xs transition-colors"
+                >
+                  <Printer className="w-4 h-4" /> Print KOT
+                </button>
+                <button
+                  onClick={() => { setPrintIsKot(false); setShowPrint(true); }}
                   className="flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 text-amber-600 dark:text-amber-500 hover:bg-amber-500/20 rounded-lg font-bold text-xs transition-colors"
                 >
                   <Printer className="w-4 h-4" /> Print Bill
