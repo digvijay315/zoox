@@ -29,6 +29,7 @@ export default function AdminDishes() {
   const [serverTotalPages, setServerTotalPages] = useState(1);
   const itemsPerPage = 10;
   const [search, setSearch] = useState("");
+  const [filterCategory, setFilterCategory] = useState("All");
 
   useEffect(() => {
     fetchCategories();
@@ -37,11 +38,11 @@ export default function AdminDishes() {
 
   useEffect(() => {
     fetchDishes();
-  }, [currentPage, search]);
+  }, [currentPage, search, filterCategory]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [search]);
+  }, [search, filterCategory]);
 
   const fetchInventoryItems = async () => {
     try {
@@ -67,7 +68,8 @@ export default function AdminDishes() {
 
   const fetchDishes = async () => {
     try {
-      const res = await api.get(`api/dishes?page=${currentPage}&limit=${itemsPerPage}&search=${search}`);
+      const categoryParam = filterCategory === "All" ? "" : filterCategory;
+      const res = await api.get(`api/dishes?page=${currentPage}&limit=${itemsPerPage}&search=${search}&category=${categoryParam}`);
       if (res.data.success) {
         setDishes(res.data.dishes);
         if (res.data.pagination) {
@@ -300,16 +302,30 @@ export default function AdminDishes() {
         <div className="flex-1 flex flex-col gap-6 min-w-0">
         <div className="glass-card rounded-2xl p-6 flex flex-col gap-4">
           
-          {/* SEARCH BAR */}
-          <div className="relative w-full mb-2">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-            <input
-              type="text"
-              placeholder="Search dishes by name..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-slate-900/60 border border-slate-800 text-slate-100 rounded-xl py-2 pl-10 pr-4 text-sm outline-none focus:border-amber-500"
-            />
+          {/* SEARCH & FILTER */}
+          <div className="flex flex-col md:flex-row gap-4 mb-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+              <input
+                type="text"
+                placeholder="Search dishes by name..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full bg-slate-900/60 border border-slate-800 text-slate-100 rounded-xl py-2 pl-10 pr-4 text-sm outline-none focus:border-amber-500"
+              />
+            </div>
+            <div className="w-full md:w-64">
+              <select
+                value={filterCategory}
+                onChange={(e) => setFilterCategory(e.target.value)}
+                className="w-full bg-slate-900/60 border border-slate-800 text-slate-100 rounded-xl px-3 py-2 text-sm outline-none focus:border-amber-500"
+              >
+                <option value="All">All Categories</option>
+                {categories.map(cat => (
+                  <option key={cat._id} value={cat.name}>{cat.name}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
