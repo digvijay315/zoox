@@ -69,7 +69,7 @@ export default function Login({ onLoginSuccess }) {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="staff@marwaribasa.com"
+                // placeholder="staff@marwaribasa.com"
                 className="w-full bg-slate-900/60 border border-slate-800 focus:border-amber-500/60 text-slate-100 rounded-2xl py-3.5 pl-12 pr-4 text-sm outline-none transition-all placeholder:text-slate-650"
               />
             </div>
@@ -86,7 +86,7 @@ export default function Login({ onLoginSuccess }) {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                // placeholder="••••••••"
                 className="w-full bg-slate-900/60 border border-slate-800 focus:border-amber-500/60 text-slate-100 rounded-2xl py-3.5 pl-12 pr-4 text-sm outline-none transition-all placeholder:text-slate-650"
               />
             </div>
