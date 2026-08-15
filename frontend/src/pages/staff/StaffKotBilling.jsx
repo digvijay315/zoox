@@ -38,6 +38,7 @@ export default function StaffKotBilling() {
   const [view, setView] = useState("tables"); // "tables" or "order"
   const [loading, setLoading] = useState(false);
   const [generatedInvoice, setGeneratedInvoice] = useState(null);
+  const [proformaInvoice, setProformaInvoice] = useState(null);
   const [isKotPrint, setIsKotPrint] = useState(false);
   const [applyGST, setApplyGST] = useState(true);
 
@@ -306,6 +307,26 @@ export default function StaffKotBilling() {
     goBackToTables();
   };
 
+  const handlePrintProforma = () => {
+    if (cart.length === 0) {
+      showError("Empty Order", "Please add items to print a bill.");
+      return;
+    }
+    const invoice = {
+      _id: activeOrderId || "PROFORMA",
+      invoiceNumber: "PROFORMA",
+      table: { tableNo: selectedTable?.tableNo },
+      items: cart,
+      subTotal: subTotal,
+      discountPercentage: checkoutData.discountPercentage || 0,
+      discountAmount: discountAmount,
+      tax: tax,
+      grandTotal: grandTotal,
+      createdAt: new Date().toISOString(),
+    };
+    setProformaInvoice(invoice);
+  };
+
   // Server-side pagination
   const currentDishes = filteredDishes;
   const totalPages = serverTotalPages;
@@ -552,11 +573,18 @@ export default function StaffKotBilling() {
               {selectedTable?.status === "Occupied" && (
                 <>
                   <button 
+                    onClick={handlePrintProforma}
+                    disabled={loading}
+                    className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg transition-colors flex justify-center items-center gap-2 mt-2"
+                  >
+                    Print Proforma Bill
+                  </button>
+                  <button 
                     onClick={promptCheckout}
                     disabled={loading}
-                    className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg transition-colors flex justify-center items-center gap-2"
+                    className="w-full mt-2 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg transition-colors flex justify-center items-center gap-2"
                   >
-                    Generate Bill & Print
+                    Generate Final Bill & Pay
                   </button>
                   <button 
                     onClick={handleCancelKOT}
@@ -575,6 +603,11 @@ export default function StaffKotBilling() {
       {/* Generate Invoice Overlay for Order View */}
       {generatedInvoice && (
         <ThermalReceipt invoice={generatedInvoice} isKot={isKotPrint} onClose={handleCloseReceipt} />
+      )}
+
+      {/* Proforma Invoice Overlay */}
+      {proformaInvoice && (
+        <ThermalReceipt invoice={proformaInvoice} isKot={false} onClose={() => setProformaInvoice(null)} />
       )}
 
       {/* Checkout Modal */}
