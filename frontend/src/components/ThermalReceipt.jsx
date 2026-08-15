@@ -6,15 +6,10 @@ export default function ThermalReceipt({ invoice, onClose, isKot = false }) {
     const timer = setTimeout(() => {
       window.print();
     }, 500);
-    const afterPrint = () => {
-      onClose();
-    };
-    window.addEventListener("afterprint", afterPrint);
     return () => {
       clearTimeout(timer);
-      window.removeEventListener("afterprint", afterPrint);
     };
-  }, [onClose]);
+  }, []);
 
   if (!invoice) return null;
 
