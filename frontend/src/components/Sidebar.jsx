@@ -25,6 +25,12 @@ export default function Sidebar({ isOpen, closeSidebar }) {
       show: true,
     },
     {
+      name: "Print Pending KOT",
+      path: "/admin/kot-print",
+      icon: FileText,
+      show: true,
+    },
+    {
       name: "Room Bookings",
       path: "/admin/room-reports",
       icon: BookOpen,

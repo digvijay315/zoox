@@ -101,7 +101,10 @@ exports.createOrUpdateOrder = async (req, res) => {
 // @access  Private
 exports.getActiveOrder = async (req, res) => {
   try {
-    const table = await Table.findOne({ _id: req.params.tableId }).populate("currentOrderId");
+    const table = await Table.findOne({ _id: req.params.tableId }).populate({
+      path: "currentOrderId",
+      populate: { path: "createdBy", select: "name" }
+    });
     if (!table || !table.currentOrderId) {
       return res.status(200).json({ success: true, data: null });
     }
@@ -119,7 +122,7 @@ exports.getActiveVirtualOrders = async (req, res) => {
     const orders = await Order.find({ 
       orderType: { $ne: "Table" },
       status: "Active" 
-    });
+    }).populate("createdBy", "name");
     res.status(200).json({ success: true, data: orders });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -307,6 +310,38 @@ exports.cancelOrder = async (req, res) => {
     await Order.deleteOne({ _id: order._id });
 
     res.status(200).json({ success: true, message: "Order cancelled successfully" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Mark items as printed for KOT
+// @route   PUT /api/orders/:orderId/mark-printed
+// @access  Private (Staff/Admin)
+exports.markOrderPrinted = async (req, res) => {
+  try {
+    const { items } = req.body; // Array of { dishId, printedQuantity } to update
+    const order = await Order.findById(req.params.orderId);
+    
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found" });
+    }
+
+    if (!items || !Array.isArray(items)) {
+      return res.status(400).json({ success: false, message: "Items array is required" });
+    }
+
+    // Update printed quantities
+    items.forEach(updateItem => {
+      const existingItem = order.items.find(i => i.dishId.toString() === updateItem.dishId);
+      if (existingItem) {
+        // Increment the printed quantity by what was just printed
+        existingItem.printedQuantity = (existingItem.printedQuantity || 0) + updateItem.quantity;
+      }
+    });
+
+    await order.save();
+    res.status(200).json({ success: true, message: "KOT marked as printed", data: order });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

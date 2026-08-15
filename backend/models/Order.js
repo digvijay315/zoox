@@ -34,6 +34,10 @@ const orderSchema = new mongoose.Schema(
           type: Number,
           required: true,
         },
+        printedQuantity: {
+          type: Number,
+          default: 0,
+        },
         category: {
           type: String,
         }

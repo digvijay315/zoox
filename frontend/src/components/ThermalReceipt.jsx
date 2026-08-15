@@ -1,7 +1,9 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { Printer, X, CheckCircle } from "lucide-react";
+import html2canvas from "html2canvas";
 
 export default function ThermalReceipt({ invoice, onClose, isKot = false }) {
+  const receiptRef = useRef(null);
   useEffect(() => {
     const timer = setTimeout(() => {
       window.print();
@@ -49,8 +51,35 @@ export default function ThermalReceipt({ invoice, onClose, isKot = false }) {
 
   const netAmount = subTotal - (invoice.discountAmount || 0) + cgst + sgst;
 
+  const printViaRawBT = async () => {
+    if (!receiptRef.current) return;
+    
+    try {
+      const canvas = await html2canvas(receiptRef.current, {
+        scale: 2, // High resolution for better print quality
+        useCORS: true, // Allow external QR code images
+        logging: false,
+        backgroundColor: "#ffffff"
+      });
+      
+      const base64Image = canvas.toDataURL("image/png");
+      const base64Data = base64Image.split(',')[1];
+      
+      // RawBT intent for base64 images
+      const intentUrl = "rawbt:base64," + base64Data;
+      
+      // For desktop debugging
+      console.log("RawBT image intent generated.");
+      
+      window.location.href = intentUrl;
+    } catch (error) {
+      console.error("Error generating image for RawBT:", error);
+      alert("Error generating receipt image. Please try Normal Print.");
+    }
+  };
+
   const ReceiptContent = () => (
-    <div className="bg-white text-black font-mono mx-auto px-2 pb-4" style={{ width: '80mm', minHeight: '100mm', fontSize: '12px', lineHeight: '1.2' }}>
+    <div ref={receiptRef} className="bg-white text-black font-mono mx-auto px-2 pb-4" style={{ width: '80mm', minHeight: '100mm', fontSize: '12px', lineHeight: '1.2' }}>
       <div className="text-center mb-1">
         {!isKot && hLogo && <img src={hLogo} alt="Hotel Logo" className="w-16 h-16 object-contain mx-auto mb-2 grayscale" />}
         <h1 className="text-xl font-bold tracking-wide uppercase">{isKot ? "KITCHEN KOT" : hName}</h1>
@@ -143,7 +172,18 @@ export default function ThermalReceipt({ invoice, onClose, isKot = false }) {
             <span className="uppercase">{hCashier}</span>
           </div>
 
-          <div className="mt-1 font-bold underline text-sm">
+          <div className="mt-4 mb-2 flex flex-col items-center justify-center border-t border-b border-black border-dashed py-2">
+            <div className="font-bold text-sm mb-1 uppercase tracking-wider">Scan & Pay</div>
+            <img 
+              src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=1&data=${encodeURIComponent(`upi://pay?pa=341262503463702@cnrb&pn=${hName}&am=${netAmount.toFixed(2)}`)}`} 
+              alt="UPI QR Code" 
+              className="w-24 h-24 object-contain mix-blend-multiply"
+              crossOrigin="anonymous"
+            />
+            <div className="text-[10px] mt-1 font-semibold">UPI: 341262503463702@cnrb</div>
+          </div>
+
+          <div className="mt-2 font-bold underline text-sm">
             Terms & Conditions
           </div>
           <div className="text-[11px] leading-tight mt-1">
@@ -173,10 +213,16 @@ export default function ThermalReceipt({ invoice, onClose, isKot = false }) {
       {/* Non-print UI buttons */}
       <div className="fixed top-4 right-4 no-print flex gap-2 z-[100000]">
         <button
+          onClick={printViaRawBT}
+          className="px-4 py-2 bg-purple-600 text-white rounded font-bold shadow-lg"
+        >
+          Print (RawBT App)
+        </button>
+        <button
           onClick={() => window.print()}
           className="px-4 py-2 bg-blue-600 text-white rounded font-bold shadow-lg"
         >
-          Print Now
+          Normal Print
         </button>
         <button
           onClick={onClose}

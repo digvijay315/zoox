@@ -28,6 +28,7 @@ import AdminSettings from "./pages/admin/AdminSettings";
 import AdminInventory from "./pages/admin/AdminInventory";
 import AdminBilling from "./pages/admin/AdminBilling";
 import AdminLookups from "./pages/admin/AdminLookups";
+import AdminKotPrint from "./pages/admin/AdminKotPrint";
 
 // Guard for Admin Routes
 const AdminRoute = ({ children, currentUser, handleLogout, theme, toggleTheme }) => {
@@ -251,6 +252,16 @@ export default function App() {
           element={
             <AdminRoute currentUser={currentUser} handleLogout={handleLogout} theme={theme} toggleTheme={toggleTheme}>
               <AdminKotReports />
+            </AdminRoute>
+          }
+        />
+        
+        {/* Admin KOT Print Route */}
+        <Route
+          path="/admin/kot-print"
+          element={
+            <AdminRoute currentUser={currentUser} handleLogout={handleLogout} theme={theme} toggleTheme={toggleTheme}>
+              <AdminKotPrint />
             </AdminRoute>
           }
         />
