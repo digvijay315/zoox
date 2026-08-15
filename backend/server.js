@@ -20,7 +20,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Default route
 app.get("/", (req, res) => {
-  res.send("Secure Billing Pro API is running...");
+  res.send("Zoox is running...");
 });
 
 // Routes
