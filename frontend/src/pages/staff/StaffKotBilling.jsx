@@ -82,8 +82,8 @@ export default function StaffKotBilling() {
 
   const fetchDishes = async () => {
     try {
-      const categoryParam = selectedCategory === "All" ? "" : selectedCategory;
-      const res = await api.get(`api/dishes?page=${currentPage}&limit=${itemsPerPage}&search=${search}&category=${categoryParam}`);
+      const categoryParam = selectedCategory === "All" ? "" : encodeURIComponent(selectedCategory);
+      const res = await api.get(`api/dishes?page=${currentPage}&limit=${itemsPerPage}&search=${encodeURIComponent(search)}&category=${categoryParam}`);
       if (res.data.success) {
         // filter out unavailable dishes just in case, though ideally backend does this
         const available = res.data.dishes.filter(d => d.available);

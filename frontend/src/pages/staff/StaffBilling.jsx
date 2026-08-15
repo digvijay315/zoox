@@ -65,8 +65,8 @@ export default function StaffBilling() {
 
   const fetchDishes = async () => {
     try {
-      const categoryParam = selectedCategory === "All" ? "" : selectedCategory;
-      const res = await api.get(`api/dishes?page=${currentPage}&limit=${itemsPerPage}&search=${search}&category=${categoryParam}`);
+      const categoryParam = selectedCategory === "All" ? "" : encodeURIComponent(selectedCategory);
+      const res = await api.get(`api/dishes?page=${currentPage}&limit=${itemsPerPage}&search=${encodeURIComponent(search)}&category=${categoryParam}`);
       if (res.data.success) {
         const available = res.data.dishes.filter(d => d.available);
         setFilteredDishes(available);

@@ -68,8 +68,8 @@ export default function AdminDishes() {
 
   const fetchDishes = async () => {
     try {
-      const categoryParam = filterCategory === "All" ? "" : filterCategory;
-      const res = await api.get(`api/dishes?page=${currentPage}&limit=${itemsPerPage}&search=${search}&category=${categoryParam}`);
+      const categoryParam = filterCategory === "All" ? "" : encodeURIComponent(filterCategory);
+      const res = await api.get(`api/dishes?page=${currentPage}&limit=${itemsPerPage}&search=${encodeURIComponent(search)}&category=${categoryParam}`);
       if (res.data.success) {
         setDishes(res.data.dishes);
         if (res.data.pagination) {
@@ -87,7 +87,7 @@ export default function AdminDishes() {
       return;
     }
     try {
-      const res = await api.get(`/api/dishes?category=${category}&limit=1`);
+      const res = await api.get(`/api/dishes?category=${encodeURIComponent(category)}&limit=1`);
       const prefixMap = {
         "Salad": "SA", "Soup": "SO", "Continental Appetizers": "CA", "Pizza": "PZ",
         "Pasta": "PA", "Asian Appetizers": "AA", "Tandoor E Dastaan": "TD", "S.S Kebeb Platter": "SS",
