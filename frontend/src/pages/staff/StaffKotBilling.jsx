@@ -235,16 +235,16 @@ export default function StaffKotBilling() {
           createdAt: new Date().toISOString()
         });
 
-        // Update backend printed quantities for these new items
-        try {
-          const updateData = newKotItems.map(item => ({
-            dishId: item.dishId,
-            quantity: item.quantity // the diffQty
-          }));
-          await orderAPI.markKotPrinted(savedOrder._id, updateData);
-        } catch (e) {
-          console.error("Failed to mark KOT as printed", e);
-        }
+        // // Update backend printed quantities for these new items
+        // try {
+        //   const updateData = newKotItems.map(item => ({
+        //     dishId: item.dishId,
+        //     quantity: item.quantity // the diffQty
+        //   }));
+        //   await orderAPI.markKotPrinted(savedOrder._id, updateData);
+        // } catch (e) {
+        //   console.error("Failed to mark KOT as printed", e);
+        // }
 
       } else {
         showSuccess("Saved", "Order updated! No new items to print for KOT.");

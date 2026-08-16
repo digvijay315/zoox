@@ -199,41 +199,80 @@ export default function AdminKotPrint() {
               </div>
            </div>
 
-           <div className="space-y-2 mb-8 max-h-[50vh] overflow-y-auto pr-2">
-              {selectedOrder.items.map(item => (
-                <div 
-                  key={item.dishId} 
-                  onClick={() => toggleItemSelection(item.dishId)}
-                  className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-colors ${
-                    item.selected 
-                      ? "bg-amber-500/10 border-amber-500/50" 
-                      : "bg-slate-900/50 border-slate-800 hover:border-slate-600"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    {item.selected ? (
-                      <CheckSquare className="w-5 h-5 text-amber-500" />
-                    ) : (
-                      <Square className="w-5 h-5 text-slate-500" />
-                    )}
-                    <div>
-                      <p className="font-bold text-slate-200">{item.name}</p>
-                      <p className="text-xs text-slate-400">Total Qty: {item.quantity}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    {item.pendingQty > 0 ? (
-                      <span className="bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded text-xs font-bold">
-                        Pending: {item.pendingQty}
-                      </span>
-                    ) : (
-                      <span className="bg-slate-800 text-slate-500 px-2 py-1 rounded text-xs">
-                        Printed ({item.printedQuantity || 0})
-                      </span>
-                    )}
+           <div className="space-y-6 mb-8 max-h-[50vh] overflow-y-auto pr-2">
+              {/* Pending Items Section */}
+              {selectedOrder.items.filter(item => item.pendingQty > 0).length > 0 && (
+                <div>
+                  <h3 className="text-emerald-400 font-bold mb-3 border-b border-emerald-500/30 pb-1">New / Pending Items</h3>
+                  <div className="space-y-2">
+                    {selectedOrder.items.filter(item => item.pendingQty > 0).map(item => (
+                      <div 
+                        key={item.dishId} 
+                        onClick={() => toggleItemSelection(item.dishId)}
+                        className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-colors ${
+                          item.selected 
+                            ? "bg-amber-500/10 border-amber-500/50" 
+                            : "bg-slate-900/50 border-slate-800 hover:border-slate-600"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          {item.selected ? (
+                            <CheckSquare className="w-5 h-5 text-amber-500" />
+                          ) : (
+                            <Square className="w-5 h-5 text-slate-500" />
+                          )}
+                          <div>
+                            <p className="font-bold text-slate-200">{item.name}</p>
+                            <p className="text-xs text-slate-400">Total Qty: {item.quantity}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <span className="bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded text-xs font-bold animate-pulse">
+                            New: {item.pendingQty}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              ))}
+              )}
+
+              {/* Already Printed Section */}
+              {selectedOrder.items.filter(item => item.pendingQty === 0).length > 0 && (
+                <div>
+                  <h3 className="text-slate-500 font-bold mb-3 border-b border-slate-800 pb-1">Already Printed (Can select to reprint)</h3>
+                  <div className="space-y-2">
+                    {selectedOrder.items.filter(item => item.pendingQty === 0).map(item => (
+                      <div 
+                        key={item.dishId} 
+                        onClick={() => toggleItemSelection(item.dishId)}
+                        className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-colors ${
+                          item.selected 
+                            ? "bg-amber-500/10 border-amber-500/50" 
+                            : "bg-slate-900/30 border-slate-800 hover:border-slate-600 opacity-75"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          {item.selected ? (
+                            <CheckSquare className="w-5 h-5 text-amber-500" />
+                          ) : (
+                            <Square className="w-5 h-5 text-slate-500" />
+                          )}
+                          <div>
+                            <p className="font-bold text-slate-400">{item.name}</p>
+                            <p className="text-xs text-slate-500">Total Qty: {item.quantity}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <span className="bg-slate-800 text-slate-500 px-2 py-1 rounded text-xs">
+                            Printed ({item.printedQuantity || 0})
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
            </div>
 
            <button 
