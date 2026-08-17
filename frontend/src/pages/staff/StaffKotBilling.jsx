@@ -14,9 +14,9 @@ export default function StaffKotBilling() {
     customerName: "",
     customerMobile: "",
     customerEmail: "",
-    paymentMode: "Cash",
-    discountPercentage: 0
+    paymentMode: "Cash"
   });
+  const [discountPercentage, setDiscountPercentage] = useState(0);
   // Menu Data
   const [dishes, setDishes] = useState([]);
   const [filteredDishes, setFilteredDishes] = useState([]);
@@ -117,6 +117,7 @@ export default function StaffKotBilling() {
     setCart(order.items || []);
     setInitialCart(JSON.parse(JSON.stringify(order.items || [])));
     setActiveOrderId(order._id);
+    setDiscountPercentage(0);
     setView("order");
   };
 
@@ -130,6 +131,7 @@ export default function StaffKotBilling() {
     setCart([]);
     setInitialCart([]);
     setActiveOrderId(null);
+    setDiscountPercentage(0);
     setView("order");
   };
 
@@ -138,6 +140,7 @@ export default function StaffKotBilling() {
     setCart([]);
     setInitialCart([]);
     setActiveOrderId(null);
+    setDiscountPercentage(0);
     setView("order");
 
     if (table.status === "Occupied") {
@@ -158,6 +161,7 @@ export default function StaffKotBilling() {
   const goBackToTables = () => {
     setView("tables");
     setSelectedTable(null);
+    setDiscountPercentage(0);
     fetchTables();
     fetchVirtualOrders();
   };
@@ -189,7 +193,7 @@ export default function StaffKotBilling() {
   };
 
   const subTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const discountAmount = Math.round((subTotal * (checkoutData.discountPercentage || 0) / 100) * 100) / 100;
+  const discountAmount = Math.round((subTotal * (discountPercentage || 0) / 100) * 100) / 100;
   const tax = applyGST ? Math.round(((subTotal - discountAmount) * 0.05) * 100) / 100 : 0; // 5% GST
   const grandTotal = Math.round((subTotal - discountAmount + tax) * 100) / 100;
 
@@ -295,12 +299,13 @@ export default function StaffKotBilling() {
 
     setLoading(true);
     try {
-      const res = await api.post(`api/orders/${activeOrderId}/checkout`, checkoutData);
+      const res = await api.post(`api/orders/${activeOrderId}/checkout`, { ...checkoutData, discountPercentage });
       if (res.data.success) {
         setIsKotPrint(false);
         setGeneratedInvoice(res.data.data);
         setShowCheckoutModal(false);
-        setCheckoutData({ customerName: "", customerMobile: "", customerEmail: "", paymentMode: "Cash", discountPercentage: 0 });
+        setCheckoutData({ customerName: "", customerMobile: "", customerEmail: "", paymentMode: "Cash" });
+        setDiscountPercentage(0);
       }
     } catch (error) {
       showError("Checkout Failed", error.response?.data?.message || "Failed to generate bill.");
@@ -332,7 +337,7 @@ export default function StaffKotBilling() {
       table: { tableNo: selectedTable?.tableNo },
       items: cart,
       subTotal: subTotal,
-      discountPercentage: checkoutData.discountPercentage || 0,
+      discountPercentage: discountPercentage || 0,
       discountAmount: discountAmount,
       tax: tax,
       grandTotal: grandTotal,
@@ -569,9 +574,21 @@ export default function StaffKotBilling() {
                 <input type="checkbox" checked={applyGST} onChange={(e) => setApplyGST(e.target.checked)} className="accent-amber-500" />
                 Apply 5% GST
               </label>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-slate-400">Discount %</span>
+                <input 
+                  type="number" 
+                  min="0"
+                  max="100"
+                  value={discountPercentage}
+                  onChange={e => setDiscountPercentage(Number(e.target.value) || 0)}
+                  className="w-16 bg-slate-800 border border-slate-700 text-white rounded px-2 py-1 text-xs outline-none focus:border-amber-500 text-right"
+                  placeholder="0"
+                />
+              </div>
             </div>
             <div className="flex justify-between text-xs py-1 text-slate-400"><span>Subtotal</span><span>₹{subTotal.toFixed(2)}</span></div>
-            {discountAmount > 0 && <div className="flex justify-between text-xs py-1 text-amber-500"><span>Discount ({checkoutData.discountPercentage}%)</span><span>-₹{discountAmount.toFixed(2)}</span></div>}
+            {discountAmount > 0 && <div className="flex justify-between text-xs py-1 text-amber-500"><span>Discount ({discountPercentage}%)</span><span>-₹{discountAmount.toFixed(2)}</span></div>}
             {applyGST && <div className="flex justify-between text-xs py-1 text-slate-400"><span>GST (5%)</span><span>₹{tax.toFixed(2)}</span></div>}
             <div className="flex justify-between font-bold text-slate-100 py-1.5 border-t border-slate-700 mt-1"><span>Grand Total</span><span className="text-amber-400">₹{grandTotal.toFixed(2)}</span></div>
             
@@ -646,18 +663,6 @@ export default function StaffKotBilling() {
                   <option value="Credit Bill">Credit Bill</option>
                   <option value="NC Bill">NC Bill (Non-Chargeable)</option>
                 </select>
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-400 mb-1">Discount (%)</label>
-                <input 
-                  type="number" 
-                  min="0"
-                  max="100"
-                  value={checkoutData.discountPercentage}
-                  onChange={e => setCheckoutData({...checkoutData, discountPercentage: Number(e.target.value) || 0})}
-                  className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 outline-none focus:border-amber-500"
-                  placeholder="0"
-                />
               </div>
               <div>
                 <label className="block text-xs font-semibold text-slate-400 mb-1">Customer Name {['NC Bill', 'Credit Bill'].includes(checkoutData.paymentMode) ? '*' : ''}</label>
